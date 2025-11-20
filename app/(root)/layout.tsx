@@ -1,7 +1,7 @@
 import React from "react";
-import Navbar from "@/components/ui/navigation/navbar";
-import Leftbar from "@/components/ui/navigation/leftbar/Leftbar";
-import Rightbar from "@/components/ui/navigation/rightbar/Rightbar";
+import Navbar from "@/components/navigation/navbar";
+import Leftbar from "@/components/navigation/leftbar/Leftbar";
+import Rightbar from "@/components/navigation/rightbar/Rightbar";
 
 export default function RootLayout({
   children,
@@ -15,8 +15,8 @@ export default function RootLayout({
         <div className="sm:w-[110px] xl:w-[266px]">
           <Leftbar />
         </div>
-        <section className="flex flex-1 p-4 min-h-screen">
-          <div className="mx-auto max-w-7xl">{children}</div>
+        <section className="flex flex-1 px-4 min-h-screen ">
+          <div className="mx-auto max-w-7xl w-full">{children}</div>
         </section>
         <div className="lg:w-[260px] xl:w-[340px]">
           <Rightbar />

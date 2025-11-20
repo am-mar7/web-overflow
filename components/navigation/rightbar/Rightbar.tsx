@@ -27,7 +27,7 @@ export default function Rightbar() {
             return (
               <div key={_id}>
                 <Link href={ROUTES.QUESTION(_id)} className="flex-between">
-                  <p className="text-dark500_light700 body-medium">{title}</p>
+                  <p className="text-dark500_light700 paragraph-medium">{title}</p>
                   <Image
                     src="icons/chevron-right.svg"
                     alt="shevron"

@@ -1,4 +1,4 @@
-import AuthForm from "@/components/ui/froms/AuthForm";
+import AuthForm from "@/components/forms/AuthForm";
 import { SignInSchema } from "@/lib/validation";
 import React from "react";
 

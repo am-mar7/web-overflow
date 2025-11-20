@@ -43,7 +43,7 @@
   --font-inter: var(--font-inter);
   --font-space-grotesk: var(--font-space-grotesk);
 }
-
+/* text  */
 @utility h1-bold {
   @apply text-[30px] font-bold leading-[42px] tracking-tighter;
 }
@@ -107,6 +107,7 @@
 @utility placeholder {
   @apply placeholder:text-light-400 dark:placeholder:text-light-500;
 }
+/* flex box  */
 @utility flex-between{
   @apply flex justify-between items-center;
 }
@@ -114,13 +115,17 @@
   @apply flex justify-center items-center;
 } 
 @utility flex-start{
-  @apply flex justify-start items-start
+  @apply flex justify-start items-center
 }
 @utility flex-end{
   @apply flex justify-end items-end
 }
+/* backgrounds  */
 @utility bg-light900_dark100{
   @apply bg-light-900 dark:bg-dark-100;
+}
+@utility bg-light900_dark200{
+  @apply bg-light-900 dark:bg-dark-200;
 }
 @utility bg-light850_dark100{
   @apply bg-light-850 dark:bg-dark-100;
@@ -140,9 +145,32 @@
 @utility bg-primary-gradient {
   background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
 }
+@utility dark-gradient {
+  background: linear-gradient(
+    232deg,
+    rgba(23, 28, 35, 0.41) 0%,
+    rgba(19, 22, 28, 0.7) 100%
+  );
+  background: linear-gradient(
+    232deg,
+    rgba(23, 28, 35, 0.41) 0%,
+    rgba(19, 22, 28, 0.7) 100%
+  );
+}
+@utility light-gradient {
+  background: linear-gradient(
+    132deg,
+    rgba(247, 249, 255, 0.5) 0%,
+    rgba(229, 237, 255, 0.25) 100%
+  );
+}
+@utility bg-light800_darkgradient {
+  @apply bg-light-800 dark:dark-gradient;
+}
+/* text colors  */
 @utility text-dark200_light800{
   @apply text-dark-200 dark:text-light-800;
-}
+} 
 @utility text-dark500_light700{
   @apply text-dark-500 dark:text-light-700;
 }

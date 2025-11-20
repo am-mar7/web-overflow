@@ -1,9 +1,9 @@
-import { Button } from "../../button";
+import { Button } from "../../ui/button";
 import ROUTES from "@/constants/routes";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function SignupBtn() {
+export default function SignupBtn({isMobile = false}) {
   return (
     <Button
       className="py-3 text-dark200_light800 btn-secondary h3-semibold"
@@ -15,9 +15,9 @@ export default function SignupBtn() {
           alt="login logo"
           width={20}
           height={20}
-          className="xl:hidden invert-colors"
+          className={`${isMobile ? "":"xl:hidden"} invert-colors`}
         />
-        <span className="max-xl:hidden">Sign up</span>
+        <span className={`${isMobile ? "":"max-xl:hidden"}`}>Sign up</span>
       </Link>
     </Button>
   );

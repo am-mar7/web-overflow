@@ -1,9 +1,9 @@
 "use client";
 import { toast } from "sonner";
-import { Button } from "../button";
 import Image from "next/image";
 import ROUTES from "@/constants/routes";
 import { signIn } from "next-auth/react";
+import { Button } from "../ui/button";
 
 export default function SocialAuthForm() {
   const buttonClass =
