@@ -29,8 +29,8 @@ export default function NavLinks({ isMobile = false }) {
             <Image
               src={link.imgURL}
               alt={link.label}
-              width={30}
-              height={30}
+              width={20}
+              height={20}
               className={isActive ? "" : "invert-colors"}
             />
             <p
