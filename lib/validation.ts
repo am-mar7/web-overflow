@@ -1,5 +1,3 @@
-"use client";
-
 import { z } from "zod";
 
 export const SignInSchema = z.object({
@@ -60,4 +58,13 @@ export const createQuestionSchema = z.object({
     )
     .min(1, { message: "Please select at least one tag." })
     .max(5, { message: "You can select up to 5 tags." }),
+});
+
+export const UserSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  bio: z.string().optional(),
+  image: z.string().url("Invalid image URL").optional(),
+  portfolio: z.string().url("Invalid portfolio URL").optional(),
+  reputation: z.number().optional(),
 });

@@ -15,10 +15,10 @@ declare global {
   var mongoose: MongooseCache;
 }
 
-const cache = global.mongoose;
+let cache = global.mongoose;
 
 if (!cache) {
-  global.mongoose = global.mongoose = { conn: null, promise: null };
+  cache = global.mongoose = { conn: null, promise: null };
 }
 
 export const dbConnect = async () => {
