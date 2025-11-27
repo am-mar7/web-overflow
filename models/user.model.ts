@@ -1,4 +1,4 @@
-import mongoose, { models } from "mongoose";
+import mongoose, { models , Document} from "mongoose";
 
 export interface IUser {
   name: string;
@@ -8,6 +8,7 @@ export interface IUser {
   portfolio?: string;
   reputation?: number;
 }
+export interface IUserDoc extends IUser , Document {}
 
 const UserSchema = new mongoose.Schema<IUser>(
   {

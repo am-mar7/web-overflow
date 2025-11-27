@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DefaultValues, FieldValues , useForm } from "react-hook-form";
+import { DefaultValues, FieldValues, useForm } from "react-hook-form";
 import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,13 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import ROUTES from "@/constants/routes";
 import { SignInSchema, SignUpSchema } from "@/lib/validation";
+import {
+  credentialsSignIn,
+  credentialsSignUp,
+} from "@/lib/server actions/auth.action";
+import { ActionResponse } from "@/Types/global";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type AuthFromType<T extends FieldValues> = {
   defaultValues: T;
@@ -23,26 +30,48 @@ type AuthFromType<T extends FieldValues> = {
 };
 export default function AuthForm<T extends FieldValues>({
   defaultValues,
-  formType,  
+  formType,
 }: AuthFromType<T>) {
   // ...
-  const formSchema :  typeof SignInSchema | typeof SignUpSchema = formType === "SIGN_IN" ? SignInSchema : SignUpSchema;
+  const formSchema: typeof SignInSchema | typeof SignUpSchema =
+    formType === "SIGN_IN" ? SignInSchema : SignUpSchema;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
-  console.log(formType);
 
+  const router = useRouter();
   // 2. Define a submit handler.
-  const handleSubmit = function () {
-    // Handle form submission
-    console.log("Form submitted:", form.getValues());
+  const handleSubmit = async function () {
+    const onSubmit =
+      formType === "SIGN_IN" ? credentialsSignIn : credentialsSignUp;
+    const result = (await onSubmit(form.getValues())) as ActionResponse;
+    console.log(result);
+    const successMSG =
+      formType === "SIGN_IN"
+        ? "You have signed in successfully"
+        : "You have created Account successfully";
+
+    if (result && result.success) {
+      toast.success(successMSG, {
+        duration: 3000,
+      });
+      router.push(ROUTES.HOME);
+    } else {
+      toast.error(result?.error?.message || "Something went wrong", {
+        duration: 3000,
+      });
+    }
   };
 
   const buttonText = formType === "SIGN_IN" ? "Sign In" : "Sign Up";
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 mt-8">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-6 mt-8"
+      >
         {Object.keys(defaultValues).map((field, idx) => {
           return (
             <FormField
