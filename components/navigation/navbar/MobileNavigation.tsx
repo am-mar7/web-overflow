@@ -13,8 +13,13 @@ import Link from "next/link";
 import SigninBtn from "../buttons/SigninBtn";
 import SignupBtn from "../buttons/SignupBtn";
 import NavLinks from "./NavLinks";
+import { auth } from "@/auth";
+import LogoutBtn from "../buttons/LogoutBtn";
 
-export default function MobileNavigation() {
+export default async function MobileNavigation() {
+  const session = await auth();
+  const isAuthentecated = session?.user ? true : false;
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -50,16 +55,22 @@ export default function MobileNavigation() {
             </p>
           </Link>
           <div className="space-y-4 mt-12">
-            <NavLinks isMobile />
+            <NavLinks isMobile userId={session?.user?.id}/>
           </div>
         </div>
         <SheetFooter>
-          <SheetClose asChild>
-            <SigninBtn isMobile />
-          </SheetClose>
-          <SheetClose asChild>
-            <SignupBtn isMobile />
-          </SheetClose>
+          {isAuthentecated ? (
+            <LogoutBtn isMobile/>
+          ) : (
+            <>
+              <SheetClose asChild>
+                <SigninBtn isMobile />
+              </SheetClose>
+              <SheetClose asChild>
+                <SignupBtn isMobile />
+              </SheetClose>
+            </>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

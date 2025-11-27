@@ -3,8 +3,13 @@ import Link from "next/link";
 import { ModeToggler } from "./ModeToggler";
 import ROUTES from "@/constants/routes";
 import MobileNavigation from "./MobileNavigation";
+import { auth } from "@/auth";
+import UserAvatar from "@/components/UserAvatar";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await auth();
+  const user = session?.user;
+
   return (
     <nav className="flex-between p-5 sm:px-12 fixed w-full z-50 bg-light900_dark200 shadow-light-300 dark:shadow-none h-20">
       <Link href={ROUTES.HOME} prefetch={false} className="flex-center gap-1.5">
@@ -19,9 +24,10 @@ export default function Navbar() {
         </p>
       </Link>
       <div>global search</div>
-      <div className="flex-between gap-4">
+      <div className="flex-between gap-2 sm:gap-4">
         <ModeToggler />
-        <MobileNavigation/>
+        {user && <UserAvatar user={user}/>}
+        <MobileNavigation />
       </div>
     </nav>
   );

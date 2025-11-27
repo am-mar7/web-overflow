@@ -5,9 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavLinks({ isMobile = false }) {
+interface Props {
+  isMobile?: boolean;
+  userId?: string | null;
+}
+export default function NavLinks({ isMobile = false, userId = null }: Props) {
   const pathName = usePathname();
-  const userId = "1";
+
   return (
     <>
       {sidebarLinks.map((link) => {
