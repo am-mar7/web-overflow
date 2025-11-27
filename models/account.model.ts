@@ -6,8 +6,9 @@ export interface IAccount {
   password?: string;
   image?: string;
   provider: string;
-  providerId: string;
+  providerAccountId: string;
 }
+export interface IAccountDoc extends IAccount, Document {}
 
 const AccountSchema = new mongoose.Schema<IAccount>(
   {
@@ -16,7 +17,7 @@ const AccountSchema = new mongoose.Schema<IAccount>(
     password: { type: String },
     image: { type: String },
     provider: { type: String, required: true },
-    providerId: { type: String, required: true },
+    providerAccountId: { type: String, required: true },
   },
   { timestamps: true }
 );

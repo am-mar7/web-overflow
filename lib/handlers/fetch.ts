@@ -11,7 +11,7 @@ export default async function fetchData<T>(
   options: FetchOptions = {}
 ): Promise<ActionResponse<T>> {
   const {
-    timeout = 10000,
+    timeout = 120000,
     headers: customHeaders = {},
     ...restOptions
   } = options;

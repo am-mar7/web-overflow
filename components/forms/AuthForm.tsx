@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DefaultValues, FieldValues, Path, useForm } from "react-hook-form";
-import { ZodType } from "zod";
+import { DefaultValues, FieldValues , useForm } from "react-hook-form";
+import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,20 +15,20 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import ROUTES from "@/constants/routes";
+import { SignInSchema, SignUpSchema } from "@/lib/validation";
 
 type AuthFromType<T extends FieldValues> = {
   defaultValues: T;
   formType: "SIGN_IN" | "SIGN_UP";
-  formSchema: ZodType<T>;
 };
 export default function AuthForm<T extends FieldValues>({
   defaultValues,
-  formType,
-  formSchema,
+  formType,  
 }: AuthFromType<T>) {
   // ...
-  const form = useForm({
-    resolver: zodResolver(formSchema as ZodType<T, FieldValues>),
+  const formSchema :  typeof SignInSchema | typeof SignUpSchema = formType === "SIGN_IN" ? SignInSchema : SignUpSchema;
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
   console.log(formType);
@@ -48,7 +48,7 @@ export default function AuthForm<T extends FieldValues>({
             <FormField
               key={field || idx}
               control={form.control}
-              name={field as Path<T>}
+              name={field as "email" | "password"}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="paragraph-medium">

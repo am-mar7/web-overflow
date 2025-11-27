@@ -38,3 +38,13 @@ interface Question{
     author :Author;
     tags: Tag[];
 }
+
+interface SignInWithOauthParams {
+    provider : "google" | "github";
+    providerAccountId : string;
+    user: {
+        name : string;
+        email: string;
+        image?: string;
+    }
+}

@@ -6,6 +6,7 @@ import Account from "@/models/account.model";
 import { APIErrorResponse } from "@/Types/global";
 import { NextResponse } from "next/server";
 type ParamsType = { params: Promise<{ id: string }> };
+console.log("ACCOUNTS ROUTE LOADED");
 
 export async function GET(_: Request, { params }: ParamsType) {
   const { id } = await params;
