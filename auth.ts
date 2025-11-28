@@ -18,28 +18,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (validated.success) {
           const { email, password } = validated.data;
 
-          const {data:account} = (await api.accounts.getByProvider(
+          const { data: account } = (await api.accounts.getByProvider(
             email
           )) as ActionResponse<IAccountDoc>;
           if (!account) return null;
 
-          const {data:user} = (await api.users.getById(
+          const { data: user } = (await api.users.getById(
             account.userId.toString()
           )) as ActionResponse<IUserDoc>;
           if (!user) return null;
 
           const isValidPassword = await bcrypt.compare(
             password,
-            account.password!,
+            account.password!
           );
 
-          if(isValidPassword){
+          if (isValidPassword) {
             return {
               id: user._id.toString(),
-              name: user.name ,
+              name: user.name,
               email: user.email,
-              image: user.image,              
-            }
+              image: user.image,
+            };
           }
         }
         return null;

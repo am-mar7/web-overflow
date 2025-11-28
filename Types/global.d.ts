@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 interface ActionResponse<T = null> {
-  [x: string]: string;
   success: boolean;
   data?: T;
   error?: {
@@ -62,8 +61,16 @@ interface QuestionParams {
   tags: string[];
 }
 
-interface updateQuestionParams extends QuestionParams{
-  questionId : string;
+interface PaginatedSearchParams {
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  filter?: string;
+  sort?: string;
+}
+
+interface updateQuestionParams extends QuestionParams {
+  questionId: string;
 }
 
 interface RouteParams {

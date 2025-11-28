@@ -1,7 +1,6 @@
 import mongoose, { Mongoose } from "mongoose";
-
 const MONGODB_URI = process.env.MONGODB_URI as string;
-
+import "../models"
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined");
 }

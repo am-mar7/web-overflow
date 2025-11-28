@@ -2,9 +2,10 @@ import { getTimeStamp } from "@/lib/utils";
 import TagCard from "./TagCard";
 import Metric from "../Metric";
 import ROUTES from "@/constants/routes";
+import { Question } from "@/Types/global";
 
 export default function QuestionCard({
-  id,
+  _id,
   answers,
   views,
   author,
@@ -12,7 +13,7 @@ export default function QuestionCard({
   title,
   createdAt,
   tags,
-}: Question) {
+}: Omit<Question, "content">) {
   const metricships = [
     { iconUrl: "icons/like.svg", value: upvotes, alt: "votes" },
     { iconUrl: "icons/eye.svg", value: views, alt: "views" },
@@ -26,13 +27,13 @@ export default function QuestionCard({
       <p className="h3-semibold text-dark200_light800 mt-2">{title}</p>
       <div className="flex flex-wrap gap-3">
         {tags.map((tag) => {
-          return <TagCard key={tag.id} id={id} name={tag.name} />;
+          return <TagCard key={tag._id} id={_id} name={tag.name} />;
         })}
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-3">
         <Metric
-          iconUrl={author.avatarUrl}
-          href={ROUTES.PROFILE(author.id)}
+          iconUrl={author.avatarUrl!}
+          href={ROUTES.PROFILE(author._id)}
           value={author.name}
           alt={author.name}
         />

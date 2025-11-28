@@ -1,6 +1,8 @@
 "use server";
 import {
   ActionResponse,
+  ErrorResponse,
+  PaginatedSearchParams,
   Question,
   QuestionParams,
   updateQuestionParams,
@@ -10,6 +12,7 @@ import {
   createQuestionSchema,
   editQuestionSchema,
   getQuestionSchema,
+  PaginatedSearchParamsSchema,
 } from "../validation";
 import handleError from "../handlers/error";
 import questionModel from "@/models/question.model";
@@ -27,7 +30,7 @@ export async function createQuestion(
     authorizetionProccess: true,
   });
   if (validatedParams instanceof Error)
-    return handleError(validatedParams) as ActionResponse;
+    return handleError(validatedParams) as ErrorResponse;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -80,7 +83,7 @@ export async function createQuestion(
     } as ActionResponse<Question>;
   } catch (error) {
     await session.abortTransaction();
-    return handleError(error) as ActionResponse;
+    return handleError(error) as ErrorResponse;
   } finally {
     await session.endSession();
   }
@@ -95,7 +98,7 @@ export async function updateQuestion(
     authorizetionProccess: true,
   });
   if (validatedParams instanceof Error)
-    return handleError(validatedParams) as ActionResponse;
+    return handleError(validatedParams) as ErrorResponse;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -181,7 +184,7 @@ export async function updateQuestion(
     } as ActionResponse<Question>;
   } catch (error) {
     await session.abortTransaction();
-    return handleError(error) as ActionResponse;
+    return handleError(error) as ErrorResponse;
   } finally {
     await session.endSession();
   }
@@ -195,7 +198,7 @@ export async function getQuestion(
     schema: getQuestionSchema,
   });
   if (validated instanceof Error)
-    return handleError(validated) as ActionResponse;
+    return handleError(validated) as ErrorResponse;
   try {
     const question = await questionModel
       .findOne({ _id: questionId })
@@ -210,6 +213,70 @@ export async function getQuestion(
       data: JSON.parse(JSON.stringify(question)),
     } as ActionResponse<Question>;
   } catch (error) {
-    return handleError(error) as ActionResponse;
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getQuestions(params: PaginatedSearchParams): Promise<
+  ActionResponse<{
+    questions: Question[];
+    isNext: boolean;
+  }>
+> {
+  const validate = await actionHandler({
+    params,
+    schema: PaginatedSearchParamsSchema,
+  });
+  if (validate instanceof Error) return handleError(validate) as ErrorResponse;
+
+  let sortCriteria = {};
+  const filterQuery: mongoose.QueryFilter<typeof questionModel> = {};
+
+  const { query, filter, page = 1, pageSize = 10 } = validate.params!;
+
+  try {
+    if (filter === "recommended") {
+      return { success: true, data: { questions: [], isNext: false } };
+    }
+    switch (filter) {
+      case "newest":
+        sortCriteria = { createdAt: -1 };
+        break;
+      case "unanswered":
+        filterQuery.answers = 0;
+        sortCriteria = { answers: -1 };
+        break;
+      case "popular":
+        sortCriteria = { upvotes: -1 };
+    }
+
+    if (query) {
+      filterQuery.$or = [
+        { title: { $regex: query, $options: "i" } },
+        { content: { $regex: query, $options: "i" } },
+      ];
+    }
+
+    const questionCount = await questionModel.find().countDocuments();
+    const skip = (page - 1) * pageSize;
+    const questions = await questionModel
+      .find(filterQuery)
+      .sort(sortCriteria)
+      .limit(pageSize)
+      .skip(skip)
+      .populate("tags", "name")
+      .populate("author", "name image");
+
+    const isNext = questionCount > skip + questions.length;
+
+    return {
+      success: true,
+      data: {
+        questions: JSON.parse(JSON.stringify(questions)) as Question[],
+        isNext,
+      },
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
   }
 }
