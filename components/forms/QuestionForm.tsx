@@ -12,17 +12,23 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { useRef } from "react";
+import { useRef, useTransition } from "react";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import dynamic from "next/dynamic";
 import { Button } from "../ui/button";
 import TagCard from "../cards/TagCard";
+import { createQuestion } from "@/lib/server actions/question.action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import ROUTES from "@/constants/routes";
 
 const Editor = dynamic(() => import("../editor/index"), {
   ssr: false,
 });
 
 export default function QuestionForm() {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(createQuestionSchema),
     defaultValues: {
@@ -32,8 +38,25 @@ export default function QuestionForm() {
     },
   });
   const editorRef = useRef<MDXEditorMethods | null>(null);
-  function handleCreateQuestion() {
-    console.log(form.getValues());
+  async function handleCreateQuestion() {
+    startTransition(async () => {
+      const { success, error, data } = await createQuestion(form.getValues());
+      if (success) {
+        toast.success("Question created successfully", { duration: 3000 });
+        if (data) router.push(ROUTES.QUESTION(data._id.toString()));
+        else
+          toast.error("some thing went wrong please try again", {
+            duration: 3000,
+          });
+      } else {
+        toast.error(
+          error?.message || "some thing went wrong please try again",
+          {
+            duration: 3000,
+          }
+        );
+      }
+    });
   }
   function handleKeyDown(e: React.KeyboardEvent, field: { value: string[] }) {
     if (e.key === "Enter") {
@@ -50,7 +73,9 @@ export default function QuestionForm() {
     if (e.type === "keydown")
       newTag = (e.target as HTMLInputElement).value.trim();
     else {
-      const input = (e.target as HTMLElement).parentElement?.querySelector("input");
+      const input = (e.target as HTMLElement).parentElement?.querySelector(
+        "input"
+      );
       newTag = input?.value.trim() || "";
     }
     if (
@@ -204,8 +229,14 @@ export default function QuestionForm() {
         />
 
         <div className="mt-10 sm:mt-16 flex justify-end">
-          <Button type="submit" className="bg-primary-gradient text-light-900">
-            Publish your Question
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="bg-primary-gradient text-light-900"
+          >
+            {isPending
+              ? "Publishing"
+              : "Publish your Question"}
           </Button>
         </div>
       </form>

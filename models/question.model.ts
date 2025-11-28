@@ -1,4 +1,4 @@
-import mongoose, { models, Schema, Types } from "mongoose";
+import mongoose, { models, Schema, Types , Document } from "mongoose";
 
 export interface IQuestion {
   author: Types.ObjectId;
@@ -10,7 +10,7 @@ export interface IQuestion {
   upvotes: number;
   downvotes: number;
 }
-
+export interface IQuestionDoc extends IQuestion , Document{}
 const QuestionSchema = new mongoose.Schema<IQuestion>(
   {
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
