@@ -17,19 +17,20 @@ type APIResponse<T = null> = NextResponse<SuccessResponse<T> | ErrorResponse>;
 type APIErrorResponse = NextResponse<ErrorResponse>;
 
 interface Tag {
-  id: string;
+  _id: string;
   name: string;
 }
 
 interface Author {
-  id: string;
+  _id: string;
   name: string;
   avatarUrl?: string;
 }
 
 interface Question {
   title: string;
-  id: string;
+  _id: string;
+  content: string;
   createdAt: Date;
   updatedAt?: Date;
   upvotes: number;
@@ -48,6 +49,7 @@ interface SignInWithOauthParams {
     image?: string;
   };
 }
+
 interface AuthCredentials {
   name?: string;
   email: string;
@@ -60,3 +62,11 @@ interface QuestionParams {
   tags: string[];
 }
 
+interface updateQuestionParams extends QuestionParams{
+  questionId : string;
+}
+
+interface RouteParams {
+  params: Promise<Record<string, string>>;
+  searchParams: Promise<Record<string, string>>;
+}

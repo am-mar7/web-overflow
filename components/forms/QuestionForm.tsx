@@ -17,33 +17,63 @@ import { MDXEditorMethods } from "@mdxeditor/editor";
 import dynamic from "next/dynamic";
 import { Button } from "../ui/button";
 import TagCard from "../cards/TagCard";
-import { createQuestion } from "@/lib/server actions/question.action";
+import {
+  createQuestion,
+  updateQuestion,
+} from "@/lib/server actions/question.action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ROUTES from "@/constants/routes";
+import { Question } from "@/Types/global";
 
 const Editor = dynamic(() => import("../editor/index"), {
   ssr: false,
 });
-
-export default function QuestionForm() {
+interface Props {
+  question?: Question | null;
+  isEdit?: boolean;
+}
+export default function QuestionForm({ question, isEdit = false }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(createQuestionSchema),
     defaultValues: {
-      title: "",
-      content: "",
-      tags: [] as string[],
+      title: question?.title || "",
+      content: question?.content || "",
+      tags: (question?.tags.map((t) => t.name) || []) as string[],
     },
   });
   const editorRef = useRef<MDXEditorMethods | null>(null);
   async function handleCreateQuestion() {
     startTransition(async () => {
+      if (isEdit && question) {
+        const { success, error, data } = await updateQuestion({
+          ...form.getValues(),
+          questionId: question?._id,
+        });
+        if (success) {
+          toast.success("Question edited successfully", { duration: 3000 });
+          if (data) router.push(ROUTES.QUESTION(data._id));
+          else
+            toast.error("some thing went wrong please try again", {
+              duration: 3000,
+            });
+        } else {
+          toast.error(
+            error?.message || "some thing went wrong please try again",
+            {
+              duration: 3000,
+            }
+          );
+        }
+        return;
+      }
+
       const { success, error, data } = await createQuestion(form.getValues());
       if (success) {
         toast.success("Question created successfully", { duration: 3000 });
-        if (data) router.push(ROUTES.QUESTION(data._id.toString()));
+        if (data) router.push(ROUTES.QUESTION(data._id));
         else
           toast.error("some thing went wrong please try again", {
             duration: 3000,
@@ -235,7 +265,11 @@ export default function QuestionForm() {
             className="bg-primary-gradient text-light-900"
           >
             {isPending
-              ? "Publishing"
+              ? isEdit
+                ? "editing"
+                : "Publishing"
+              : isEdit
+              ? "Edit"
               : "Publish your Question"}
           </Button>
         </div>

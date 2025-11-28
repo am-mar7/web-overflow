@@ -60,6 +60,14 @@ export const createQuestionSchema = z.object({
     .max(5, { message: "You can select up to 5 tags." }),
 });
 
+export const editQuestionSchema = createQuestionSchema.extend({
+  questionId: z.string().min(1, "Question ID is required"),
+});
+
+export const getQuestionSchema = z.object({
+  questionId : z.string().min(1 , "Question ID is required")
+});
+
 export const UserSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),

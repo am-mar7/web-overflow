@@ -28,7 +28,7 @@ export default function TagCard({
         </div>
         {deleteTag && removable && (
           <Image
-            src="icons/close.svg"
+            src="/icons/close.svg"
             alt="close"
             width={15}
             height={15}

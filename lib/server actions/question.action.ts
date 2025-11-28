@@ -1,16 +1,26 @@
 "use server";
-import { ActionResponse, QuestionParams } from "@/Types/global";
+import {
+  ActionResponse,
+  Question,
+  QuestionParams,
+  updateQuestionParams,
+} from "@/Types/global";
 import actionHandler from "../handlers/action";
-import { createQuestionSchema } from "../validation";
+import {
+  createQuestionSchema,
+  editQuestionSchema,
+  getQuestionSchema,
+} from "../validation";
 import handleError from "../handlers/error";
-import Question, { IQuestionDoc } from "@/models/question.model";
+import questionModel from "@/models/question.model";
 import mongoose, { ObjectId } from "mongoose";
 import TagQuestion, { ITagQuestion } from "@/models/tag-question.model";
-import Tag from "@/models/tag.model";
+import Tag, { ITagDoc } from "@/models/tag.model";
+import { NotFoundError, UnauthorizedError } from "../http-errors";
 
 export async function createQuestion(
   params: QuestionParams
-): Promise<ActionResponse<IQuestionDoc | null>> {
+): Promise<ActionResponse<Question | null>> {
   const validatedParams = await actionHandler({
     params,
     schema: createQuestionSchema,
@@ -25,7 +35,7 @@ export async function createQuestion(
   const { title, content, tags } = validatedParams.params!;
   const userId = validatedParams.session?.user?.id;
   try {
-    const [question] = await Question.create(
+    const [question] = await questionModel.create(
       [
         {
           author: userId,
@@ -57,7 +67,7 @@ export async function createQuestion(
 
     await TagQuestion.insertMany(tagDocs, { session });
 
-    await Question.findByIdAndUpdate(
+    await questionModel.findByIdAndUpdate(
       question._id,
       { $push: { tags: { $each: tagIds } } },
       { session }
@@ -67,11 +77,139 @@ export async function createQuestion(
     return {
       success: true,
       data: JSON.parse(JSON.stringify(question)),
-    } as ActionResponse<IQuestionDoc>;
+    } as ActionResponse<Question>;
   } catch (error) {
     await session.abortTransaction();
     return handleError(error) as ActionResponse;
   } finally {
     await session.endSession();
+  }
+}
+
+export async function updateQuestion(
+  params: updateQuestionParams
+): Promise<ActionResponse<Question | null>> {
+  const validatedParams = await actionHandler({
+    params,
+    schema: editQuestionSchema,
+    authorizetionProccess: true,
+  });
+  if (validatedParams instanceof Error)
+    return handleError(validatedParams) as ActionResponse;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  const { title, content, tags, questionId } = validatedParams.params!;
+  const userId = validatedParams.session?.user?.id;
+
+  try {
+    const question = await questionModel.findById(questionId).populate("tags");
+    if (!question) throw new Error("Question not found");
+
+    if (question.author.toString() !== userId)
+      throw new UnauthorizedError(
+        "You are not authorized to edit this question"
+      );
+    if (title !== question.title || content !== question.content) {
+      question.title = title;
+      question.content = content;
+      await question.save({ session });
+    }
+    const tagsToAdd = tags.filter(
+      (tag) =>
+        !question.tags.some(
+          (t: ITagDoc) => t.name.toLowerCase() === tag.toLowerCase()
+        )
+    );
+
+    const tagsToRemove = (question.tags as ITagDoc[]).filter(
+      (tag) => !tags.some((t) => t.toLowerCase() === tag.name.toLowerCase())
+    );
+
+    const tagIds: ObjectId[] = [];
+    const tagDocs: ITagQuestion[] = [];
+
+    for (const tag of tagsToAdd) {
+      const newTag = await Tag.findOneAndUpdate(
+        { name: { $regex: new RegExp(`^${tag}$`, "i") } },
+        { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
+        { upsert: true, new: true, session }
+      );
+      if (!newTag) throw new Error(`Failed to create tag: ${tag}`);
+
+      tagIds.push(newTag._id);
+      tagDocs.push({
+        tag: newTag._id,
+        question: question._id,
+      });
+    }
+
+    if (tagsToRemove.length > 0) {
+      const tagsToRemoveIds = tagsToRemove.map((tag) => tag._id);
+      await Tag.updateMany(
+        { _id: { $in: tagsToRemoveIds } },
+        { $inc: { questions: -1 } },
+        { session }
+      );
+
+      await TagQuestion.deleteMany(
+        { tag: { $in: tagsToRemoveIds }, question: question._id },
+        { session }
+      );
+
+      await questionModel.findByIdAndUpdate(
+        question._id,
+        { $pull: { tags: { $in: tagsToRemoveIds } } },
+        { session }
+      );
+    }
+    if (tagIds.length)
+      await questionModel.findByIdAndUpdate(
+        question._id,
+        { $push: { tags: { $each: tagIds } } },
+        { session }
+      );
+
+    if (tagDocs.length) await TagQuestion.insertMany(tagDocs, { session });
+
+    await session.commitTransaction();
+    await question.save();
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(question)),
+    } as ActionResponse<Question>;
+  } catch (error) {
+    await session.abortTransaction();
+    return handleError(error) as ActionResponse;
+  } finally {
+    await session.endSession();
+  }
+}
+
+export async function getQuestion(
+  questionId: string
+): Promise<ActionResponse<Question | null>> {
+  const validated = await actionHandler({
+    params: { questionId },
+    schema: getQuestionSchema,
+  });
+  if (validated instanceof Error)
+    return handleError(validated) as ActionResponse;
+  try {
+    const question = await questionModel
+      .findOne({ _id: questionId })
+      .populate("tags")
+      .populate("author");
+    console.log("Question", question);
+
+    if (!question) throw new NotFoundError("Question");
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(question)),
+    } as ActionResponse<Question>;
+  } catch (error) {
+    return handleError(error) as ActionResponse;
   }
 }
