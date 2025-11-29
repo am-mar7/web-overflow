@@ -3,7 +3,7 @@
 import {
   ActionResponse,
   ErrorResponse,
-  getTagQUestionParams,
+  getTagQuestionsParams,
   PaginatedSearchParams,
   Question,
   Tag,
@@ -12,7 +12,7 @@ import handleError from "../handlers/error";
 import { Question as questionModel, Tag as tagModel } from "@/models";
 import actionHandler from "../handlers/action";
 import {
-  getTagQuestionSchema,
+  getTagQuestionsSchema,
   PaginatedSearchParamsSchema,
 } from "../validation";
 import mongoose from "mongoose";
@@ -76,12 +76,12 @@ export async function getTags(
   }
 }
 
-export async function getTagQuestion(
-  params: getTagQUestionParams
+export async function getTagQuestions(
+  params: getTagQuestionsParams
 ): Promise<ActionResponse<{ isNext: boolean; data: Question[] }>> {
   const validated = actionHandler({
     params,
-    schema: getTagQuestionSchema,
+    schema: getTagQuestionsSchema,
   });
   if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
