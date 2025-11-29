@@ -1,4 +1,4 @@
-import { techMap } from "@/constants";
+import { techDescriptionMap, techMap } from "@/constants";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -37,4 +37,13 @@ export function getTimeStamp(createdAt: Date) {
   } else {
     return diffInYears === 1 ? "1 year ago" : `${diffInYears} years ago`;
   }
+}
+
+export function getTechDescription(techName: string): string {
+  const normalizedTech = techName.replace(/[ .]/g, "").toLowerCase();
+  
+  return (
+    techDescriptionMap[normalizedTech] ||
+    `${techName} is a technology used in software development`
+  );
 }

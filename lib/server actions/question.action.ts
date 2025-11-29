@@ -257,7 +257,7 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
       ];
     }
 
-    const questionCount = await questionModel.find().countDocuments();
+    const questionCount = await questionModel.find(filterQuery).countDocuments();
     const skip = (page - 1) * pageSize;
     const questions = await questionModel
       .find(filterQuery)

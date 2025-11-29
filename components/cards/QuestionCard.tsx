@@ -3,6 +3,7 @@ import TagCard from "./TagCard";
 import Metric from "../Metric";
 import ROUTES from "@/constants/routes";
 import { Question } from "@/Types/global";
+import Link from "next/link";
 
 export default function QuestionCard({question}: {question:Omit<Question, "content">}) {
   const {_id , upvotes , views , answers , createdAt , title , author , tags} = question;
@@ -18,7 +19,9 @@ export default function QuestionCard({question}: {question:Omit<Question, "conte
       <span className="subtle-regular text-light-500">
         {getTimeStamp(createdAt)}
       </span>
-      <p className="h3-semibold text-dark200_light800 mt-2">{title}</p>
+      <div className="h3-semibold text-dark200_light800 mt-2">
+        <Link href={ROUTES.QUESTION(_id)}>{title}</Link>
+      </div>
       <div className="flex flex-wrap gap-3">
         {tags.map((tag) => {
           return <TagCard key={tag._id} id={_id} name={tag.name} />;
