@@ -70,9 +70,14 @@ interface PaginatedSearchParams {
   sort?: string;
 }
 
+interface getTagQUestionParams extends Omit<PaginatedSearchParams , "filter">{
+  tagId : string;
+}
+
 interface updateQuestionParams extends QuestionParams {
   questionId: string;
 }
+
 
 interface RouteParams {
   params: Promise<Record<string, string>>;

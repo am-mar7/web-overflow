@@ -76,6 +76,10 @@ export const PaginatedSearchParamsSchema = z.object({
   sort: z.string().optional(),
 });
 
+export const getTagQuestionSchema = PaginatedSearchParamsSchema.extend({
+  tagId : z.string().min(1 , "tag id is required")
+});
+
 export const UserSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
@@ -117,3 +121,4 @@ export const SignInWithOAuthSchema = z.object({
     image: z.string().url("Invalid image URL").optional(),
   }),
 }); 
+ 
