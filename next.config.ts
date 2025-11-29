@@ -7,7 +7,17 @@ const nextConfig: NextConfig = {
         protocol:"https",
         hostname : "i.pravatar.cc",
         port:"",
-      }
+      },
+      {
+        protocol:"https",
+        hostname: "lh3.googleusercontent.com",
+        port:"",
+      },
+      {
+        protocol:"https",
+        hostname: "lh3.githubusercontent.com",
+        port:"",
+      },
     ]
   }
 };

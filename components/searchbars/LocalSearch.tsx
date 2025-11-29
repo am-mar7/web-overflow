@@ -39,7 +39,8 @@ export default function LocalSearch({
     }, 500);
 
     return () => clearTimeout(depouncedFn);
-  }, [query, searchParams, router , pathName, route]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [query, pathName, route]);
 
   return (
     <div className="flex gap-4 p-4 bg-light800_darkgradient rounded-lg shadow-light-300 dark:shadow-none">

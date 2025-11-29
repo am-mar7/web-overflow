@@ -23,7 +23,7 @@ interface Tag {
 interface Author {
   _id: string;
   name: string;
-  avatarUrl?: string;
+  image?: string;
 }
 
 interface Question {

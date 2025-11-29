@@ -1,4 +1,5 @@
 import QuestionCard from "@/components/cards/QuestionCard";
+import DataRenderer from "@/components/DataRenderer";
 import HomeFilters from "@/components/filters/HomeFilters";
 import LocalSearch from "@/components/searchbars/LocalSearch";
 import { Button } from "@/components/ui/button";
@@ -37,47 +38,26 @@ export default async function Home({ searchParams }: RouteParams) {
 
       <HomeFilters />
 
-      {success ? (
-        <section className="mt-5 space-y-2.5">
-          {questions && questions.length > 0 ? (
-            questions.map(
-              ({
-                _id,
-                answers,
-                views,
-                author,
-                upvotes,
-                title,
-                createdAt,
-                tags,
-              }) => {
-                return (
-                  <QuestionCard
-                    key={_id}
-                    _id={_id}
-                    author={author}
-                    title={title}
-                    tags={tags}
-                    createdAt={createdAt}
-                    upvotes={upvotes}
-                    views={views}
-                    answers={answers}
-                  />
-                );
-              }
-            )
-          ) : (
-            <div className="mt-5 space-y-2.5">
-              <p className="text-dark500_light700">No questions found</p>
-            </div>
-          )}
-        </section>
-      ) : (
-        <div className="mt-10 text-red-500 text-center">
-          <p>{error?.message || "some thing went wrong"}</p>
-          <p>please try again</p>
-        </div>
-      )}
+      <DataRenderer
+        success={success}
+        error={error}
+        empty={{
+          title: "No questions found",
+          message: "The question board is empty. Maybe it’s waiting for your brilliant question to get things rolling",
+          button: {
+            text: "ask question",
+            href: ROUTES.ASK_QUESTION,
+          },
+        }}
+        data={questions}
+        render={(questions) => (
+          <section className="mt-5 w-full flex flex-col gap-6">
+            {questions?.map((question) => {
+              return <QuestionCard key={question._id} question={question} />;
+            })}
+          </section>
+        )}
+      />
     </div>
   );
 }

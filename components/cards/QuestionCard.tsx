@@ -4,16 +4,10 @@ import Metric from "../Metric";
 import ROUTES from "@/constants/routes";
 import { Question } from "@/Types/global";
 
-export default function QuestionCard({
-  _id,
-  answers,
-  views,
-  author,
-  upvotes,
-  title,
-  createdAt,
-  tags,
-}: Omit<Question, "content">) {
+export default function QuestionCard({question}: {question:Omit<Question, "content">}) {
+  const {_id , upvotes , views , answers , createdAt , title , author , tags} = question;
+  console.log(author);
+  
   const metricships = [
     { iconUrl: "icons/like.svg", value: upvotes, alt: "votes" },
     { iconUrl: "icons/eye.svg", value: views, alt: "views" },
@@ -32,7 +26,7 @@ export default function QuestionCard({
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-3">
         <Metric
-          iconUrl={author.avatarUrl!}
+          iconUrl={author.image!}
           href={ROUTES.PROFILE(author._id)}
           value={author.name}
           alt={author.name}
