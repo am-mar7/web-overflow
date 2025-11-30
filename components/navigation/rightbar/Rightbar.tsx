@@ -28,7 +28,7 @@ export default async function Rightbar() {
                     {title}
                   </p>
                   <Image
-                    src="icons/chevron-right.svg"
+                    src="/icons/chevron-right.svg"
                     alt="shevron"
                     width={20}
                     height={20}

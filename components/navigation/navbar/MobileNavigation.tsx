@@ -25,7 +25,7 @@ export default async function MobileNavigation() {
       <SheetTrigger asChild>
         <Button variant="outline" className="p-2! sm:hidden">
           <Image
-            src="icons/hamburger.svg"
+            src="/icons/hamburger.svg"
             alt="toggle icon"
             width={25}
             height={25}
