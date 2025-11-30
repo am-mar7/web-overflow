@@ -40,6 +40,16 @@ interface Question {
   tags: Tag[];
 }
 
+interface Answer {
+  _id: string;
+  author: Author;
+  content: string;
+  upvotes: number;
+  question: string;
+  downvotes: number;
+  createdAt: Date;
+}
+
 interface SignInWithOauthParams {
   provider: "google" | "github";
   providerAccountId: string;
@@ -70,14 +80,22 @@ interface PaginatedSearchParams {
   sort?: string;
 }
 
-interface getTagQuestionsParams extends Omit<PaginatedSearchParams , "filter">{
-  tagId : string;
+interface getTagQuestionsParams extends Omit<PaginatedSearchParams, "filter"> {
+  tagId: string;
 }
 
 interface updateQuestionParams extends QuestionParams {
   questionId: string;
 }
 
+interface createAnswerParams {
+  questionId: string;
+  content: string;
+}
+
+interface getAnswersParams extends PaginatedSearchParams {
+  questionId: string;
+}
 
 interface RouteParams {
   params: Promise<Record<string, string>>;

@@ -15,7 +15,7 @@ interface Props<T> {
   empty: {
     title: string;
     message:string;
-    button: {
+    button?: {
       text: string;
       href: string;
     };
@@ -96,10 +96,7 @@ export default function DataRenderer<T>({
     }}
     title={empty.title || "Ops..."}
     message={JSON.stringify(empty.message)}
-    button={{
-        text: empty?.button?.text,
-        href: empty?.button?.href,
-    }}
+    button={empty.button}
   />
   }
 

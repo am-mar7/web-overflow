@@ -52,7 +52,8 @@ export const createQuestionSchema = z.object({
 
   tags: z
     .array(
-      z.string()
+      z
+        .string()
         .min(1, { message: "Tag must have at least 1 character." })
         .max(15, { message: "Tag must not exceed 15 characters." })
     )
@@ -65,7 +66,7 @@ export const editQuestionSchema = createQuestionSchema.extend({
 });
 
 export const getQuestionSchema = z.object({
-  questionId : z.string().min(1 , "Question ID is required")
+  questionId: z.string().min(1, "Question ID is required"),
 });
 
 export const PaginatedSearchParamsSchema = z.object({
@@ -76,8 +77,20 @@ export const PaginatedSearchParamsSchema = z.object({
   sort: z.string().optional(),
 });
 
+export const answerSchema = z.object({
+  content: z.string().min(1, "content is required"),
+});
+
+export const createAnswerSchema = answerSchema.extend({
+  questionId: z.string().min(1, "question id is required"),
+});
+
+export const getAnswersSchema = PaginatedSearchParamsSchema.extend({
+  questionId: z.string().min(1 , "question id is required")
+});
+
 export const getTagQuestionsSchema = PaginatedSearchParamsSchema.extend({
-  tagId : z.string().min(1 , "tag id is required")
+  tagId: z.string().min(1, "tag id is required"),
 });
 
 export const UserSchema = z.object({
@@ -120,5 +133,4 @@ export const SignInWithOAuthSchema = z.object({
     email: z.string().email("Invalid email address"),
     image: z.string().url("Invalid image URL").optional(),
   }),
-}); 
- 
+});
