@@ -4,9 +4,11 @@ import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
 import UserAvatar from "@/components/UserAvatar";
+import Vote from "@/components/Vote";
 import ROUTES from "@/constants/routes";
 import { getAnswers } from "@/lib/server actions/answer.action";
 import { getQuestion } from "@/lib/server actions/question.action";
+import { hasVoted } from "@/lib/server actions/vote.action";
 import { getTimeStamp } from "@/lib/utils";
 import { RouteParams } from "@/Types/global";
 import Image from "next/image";
@@ -25,8 +27,17 @@ export default async function QuestionDetails({ params }: RouteParams) {
     error,
   } = await getAnswers({ questionId: question._id, pageSize: 3 });
 
-  const { upvotes, views, answers, createdAt, title, author, content, tags } =
-    question;
+  const {
+    upvotes,
+    views,
+    answers,
+    createdAt,
+    title,
+    author,
+    content,
+    tags,
+    downvotes,
+  } = question;
 
   const metricships = [
     { iconUrl: "/icons/eye.svg", value: views, alt: "views" },
@@ -49,6 +60,11 @@ export default async function QuestionDetails({ params }: RouteParams) {
     </div>
   );
 
+  const hasVotedPromise = hasVoted({
+    targetId: question._id,
+    targetType: "question",
+  })
+
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex-between">
@@ -62,25 +78,13 @@ export default async function QuestionDetails({ params }: RouteParams) {
         </Link>
 
         <div className="flex-center gap-3">
-          <div className="flex-center gap-1.5">
-            <Image
-              src="/icons/upvote.svg"
-              width={20}
-              height={20}
-              alt="upvote"
-            />
-            <span>{upvotes}</span>
-          </div>
-
-          <div className="flex-center gap-1.5">
-            <Image
-              src="/icons/downvote.svg"
-              width={20}
-              height={20}
-              alt="upvote"
-            />
-            <span>{upvotes}</span>
-          </div>
+          <Vote
+            upvotes={upvotes}
+            downvotes={downvotes}
+            targetId={question._id}
+            targetType="question"
+            hasVotedPromise={hasVotedPromise}
+          />
 
           <Image src="/icons/star.svg" width={20} height={20} alt="upvote" />
         </div>

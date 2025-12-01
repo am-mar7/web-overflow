@@ -15,6 +15,7 @@ type ErrorResponse = ActionResponse<undefined> & { success: false };
 type APIResponse<T = null> = NextResponse<SuccessResponse<T> | ErrorResponse>;
 type APIErrorResponse = NextResponse<ErrorResponse>;
 
+// data types
 interface Tag {
   _id: string;
   name: string;
@@ -34,6 +35,7 @@ interface Question {
   createdAt: Date;
   updatedAt?: Date;
   upvotes: number;
+  downvotes: number;
   answers: number;
   views: number;
   author: Author;
@@ -49,6 +51,8 @@ interface Answer {
   downvotes: number;
   createdAt: Date;
 }
+
+// params 
 
 interface SignInWithOauthParams {
   provider: "google" | "github";
@@ -100,4 +104,21 @@ interface getAnswersParams extends PaginatedSearchParams {
 interface RouteParams {
   params: Promise<Record<string, string>>;
   searchParams: Promise<Record<string, string>>;
+}
+
+interface createVoteParams {
+  targetId: string;
+  targetType: "question"|"answer";
+  voteType: "upvote"|"downvote";
+}
+
+interface updateVoteParams extends createVoteParams{
+  change: number;
+}
+
+type hasVotedParams = Pick<createVoteParams , "targetId"|"targetType">;
+
+interface HasVotedResponse{
+  hasUpvoted: boolean;
+  hasDownvoted: boolean;
 }

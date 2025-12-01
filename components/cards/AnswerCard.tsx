@@ -2,17 +2,26 @@ import { Answer } from "@/Types/global";
 import UserAvatar from "../UserAvatar";
 import { getTimeStamp } from "@/lib/utils";
 import { Preview } from "../editor/Preview";
-import Image from "next/image";
 import Link from "next/link";
 import ROUTES from "@/constants/routes";
+import Vote from "../Vote";
+import { hasVoted } from "@/lib/server actions/vote.action";
 
 export default function AnswerCard({
+  _id,
   author,
   content,
   createdAt,
   upvotes,
+  downvotes,
 }: Answer) {
   const date = getTimeStamp(createdAt);
+
+  const hasVotedPromise = hasVoted({
+    targetId: _id,
+    targetType: "answer",
+  });
+
   return (
     <article>
       <div className="flex-between">
@@ -31,28 +40,13 @@ export default function AnswerCard({
             <p className="small-regular">Answerd {date}</p>
           </div>
         </div>
-
-        <div className="flex-center gap-3">
-          <div className="flex-center gap-1.5">
-            <Image
-              src="/icons/upvote.svg"
-              width={16}
-              height={16}
-              alt="upvote"
-            />
-            <span className="small-regular">{upvotes}</span>
-          </div>
-
-          <div className="flex-center gap-1.5">
-            <Image
-              src="/icons/downvote.svg"
-              width={16}
-              height={16}
-              alt="upvote"
-            />
-            <span className="small-regular">{upvotes}</span>
-          </div>
-        </div>
+        <Vote
+          upvotes={upvotes}
+          downvotes={downvotes}
+          targetId={_id}
+          targetType="answer"
+          hasVotedPromise={hasVotedPromise}
+        />
       </div>
 
       <Preview content={content} />
