@@ -127,7 +127,11 @@ export default async function QuestionDetails({ params }: RouteParams) {
       </section>
 
       <section>
-        <AnswerForm questionId={question._id} />
+        <AnswerForm
+          questionId={question._id}
+          questionTitle={title}
+          questionContent={content}
+        />
       </section>
     </div>
   );

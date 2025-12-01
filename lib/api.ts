@@ -1,7 +1,7 @@
 import { IUser } from "@/models/user.model";
 import fetchData from "./handlers/fetch";
 import { IAccount } from "@/models/account.model";
-import { SignInWithOauthParams } from "@/Types/global";
+import { ActionResponse, APIResponse, SignInWithOauthParams } from "@/Types/global";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
@@ -59,6 +59,17 @@ const api = {
       }),
     delete: (id: string) =>
       fetchData(`${API_BASE_URL}/accounts/${id}`, { method: "DELETE" }),
+  },
+  ai: {
+    getOPtimizedAnswer: (
+      question: string,
+      content: string,
+      baseAnswer: string
+    ): Promise<ActionResponse<string>> =>
+      fetchData(`${API_BASE_URL}/ai/answers`, {
+        method: "POST",
+        body: JSON.stringify({ question, content, baseAnswer }),
+      }),
   },
 };
 

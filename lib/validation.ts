@@ -86,7 +86,7 @@ export const createAnswerSchema = answerSchema.extend({
 });
 
 export const getAnswersSchema = PaginatedSearchParamsSchema.extend({
-  questionId: z.string().min(1 , "question id is required")
+  questionId: z.string().min(1, "question id is required"),
 });
 
 export const getTagQuestionsSchema = PaginatedSearchParamsSchema.extend({
@@ -133,4 +133,15 @@ export const SignInWithOAuthSchema = z.object({
     email: z.string().email("Invalid email address"),
     image: z.string().url("Invalid image URL").optional(),
   }),
+});
+
+export const AIAnswerSchema = z.object({
+  question: z
+    .string()
+    .min(5, "question has to be at least 5 characters")
+    .max(200, "question can't exceed 200 characters"),
+
+  content: z.string().min(5, "question has to be at least 5 characters"),
+
+  baseAnswer: z.string().min(50, "answer has to be at least 50 characters"),
 });

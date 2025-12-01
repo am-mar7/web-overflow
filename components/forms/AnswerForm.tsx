@@ -17,11 +17,20 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { createAnswer } from "@/lib/server actions/answer.action";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 const Editor = dynamic(() => import("../editor/index"), {
   ssr: false,
 });
-export default function AnswerForm({ questionId }: { questionId: string }) {
+export default function AnswerForm({
+  questionId,
+  questionTitle,
+  questionContent,
+}: {
+  questionId: string;
+  questionTitle: string;
+  questionContent: string;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAiSubmitting, setIsAiSubmitting] = useState(false);
   const form = useForm({
@@ -30,7 +39,7 @@ export default function AnswerForm({ questionId }: { questionId: string }) {
       content: "",
     },
   });
-  
+
   const editorRef = useRef<MDXEditorMethods | null>(null);
 
   const handleSubmit = async () => {
@@ -54,6 +63,30 @@ export default function AnswerForm({ questionId }: { questionId: string }) {
     setIsSubmitting(false);
   };
 
+  const generateAnswer = async () => {
+    setIsAiSubmitting(true);
+    const baseAnswer = editorRef.current?.getMarkdown() || ""
+    if(baseAnswer.length < 50){
+      toast.error("your answer must exceed 50 chars before you ask ai for help !");
+      return;
+    }
+    const { success, data, error } = await api.ai.getOPtimizedAnswer(
+      questionTitle,
+      questionContent,
+      baseAnswer 
+    );
+    setIsAiSubmitting(false);
+    if (!success) {
+      toast.error(error?.message || "something went wrong please try again");
+      return;
+    }
+    if (!data) {
+      toast.error("something went wrong please try again");
+      return;
+    }
+    editorRef.current?.setMarkdown(data);
+  };
+
   return (
     <div>
       <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center my-5 gap-3">
@@ -62,11 +95,12 @@ export default function AnswerForm({ questionId }: { questionId: string }) {
         </h4>
 
         <Button
+          onClick={generateAnswer}
           disabled={form.formState.isSubmitting}
           className="bg-light800_dark200 w-full sm:w-fit shadow-sm text-primary-500 delay-75 transition-colors"
         >
           {isAiSubmitting ? (
-            "Generating"
+            "Generating..."
           ) : (
             <>
               <Image
