@@ -3,7 +3,7 @@ import { createVote } from "@/lib/server actions/vote.action";
 import { formatNumber } from "@/lib/utils";
 import { ActionResponse, HasVotedResponse } from "@/Types/global";
 import Image from "next/image";
-import { use, useState } from "react";
+import { use , useTransition } from "react";
 import { toast } from "sonner";
 
 interface Props {
@@ -21,20 +21,22 @@ export default function Vote({
   targetType,
   hasVotedPromise,
 }: Props) {
-  const [loading, setLoading] = useState(false);
   const { success, data } = use(hasVotedPromise);
   const { hasUpvoted, hasDownvoted } = data || {};
+
+  const [isPending, startTransition] = useTransition();
+
   const handlevote = async (voteType: "upvote" | "downvote") => {
-    setLoading(true);
-    const { success, error } = await createVote({
-      targetId,
-      targetType,
-      voteType,
+    startTransition(async () => {
+      const { success, error } = await createVote({
+        targetId,
+        targetType,
+        voteType,
+      });
+      console.log(success);
+      if (!success)
+        toast.error(error?.message || "something went wrong please try again");
     });
-    console.log(success);
-    if (!success)
-      toast.error(error?.message || "something went wrong please try again");
-    setTimeout(() => setLoading(false), 1500);
   };
 
   return (
@@ -47,10 +49,10 @@ export default function Vote({
           width={16}
           height={16}
           alt="upvote"
-          className={`cursor-pointer ${loading && "opacity-25"}`}
-          onClick={() => !loading && handlevote("upvote")}
+          className={`cursor-pointer ${isPending && "opacity-25"}`}
+          onClick={() => !isPending && handlevote("upvote")}
         />
-        <span className="small-regular">{formatNumber(upvotes)}</span>
+        <span className="small-regular bg-light700_dark400 py-1 px-1.5">{formatNumber(upvotes)}</span>
       </div>
 
       <div className="flex-center gap-1.5">
@@ -63,10 +65,10 @@ export default function Vote({
           width={16}
           height={16}
           alt="downvotes"
-          className={`cursor-pointer ${loading && "opacity-40"}`}
-          onClick={() => !loading && handlevote("downvote")}
+          className={`cursor-pointer ${isPending && "opacity-40"}`}
+          onClick={() => !isPending && handlevote("downvote")}
         />
-        <span className="small-regular">{formatNumber(downvotes)}</span>
+        <span className="small-regular bg-light700_dark400 px-1.5 py-1">{formatNumber(downvotes)}</span>
       </div>
     </div>
   );
