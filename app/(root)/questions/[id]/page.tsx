@@ -1,5 +1,6 @@
 import AllAnswers from "@/components/AllAnswers";
 import TagCard from "@/components/cards/TagCard";
+import CollectionBtn from "@/components/CollectionBtn";
 import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
@@ -7,6 +8,7 @@ import UserAvatar from "@/components/UserAvatar";
 import Vote from "@/components/Vote";
 import ROUTES from "@/constants/routes";
 import { getAnswers } from "@/lib/server actions/answer.action";
+import { hasSavedQuestion } from "@/lib/server actions/collection.action";
 import { getQuestion } from "@/lib/server actions/question.action";
 import { hasVoted } from "@/lib/server actions/vote.action";
 import { getTimeStamp } from "@/lib/utils";
@@ -63,7 +65,9 @@ export default async function QuestionDetails({ params }: RouteParams) {
   const hasVotedPromise = hasVoted({
     targetId: question._id,
     targetType: "question",
-  })
+  });
+
+  const hasSavedPromise = hasSavedQuestion(question._id);
 
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
@@ -86,7 +90,10 @@ export default async function QuestionDetails({ params }: RouteParams) {
             hasVotedPromise={hasVotedPromise}
           />
 
-          <Image src="/icons/star.svg" width={20} height={20} alt="upvote" />
+          <CollectionBtn
+            questionId={question._id}
+            hasSavedPromise={hasSavedPromise}
+          />
         </div>
       </section>
 

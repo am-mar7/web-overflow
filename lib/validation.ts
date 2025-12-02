@@ -168,3 +168,5 @@ export const hasVotedSchema = createVoteSchema.pick({
   targetId: true,
   targetType: true,
 });
+
+export const CollectionSchema =  getQuestionSchema.extend({});
