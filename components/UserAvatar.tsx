@@ -19,11 +19,11 @@ export default function UserAvatar({
     .slice(0, 2);
 
   return (
-    <Avatar className={`w-${width} h-${height}`}>
+    <Avatar className={`w-${width} h-${height} bg-amber-400`}>
       {image ? (
         <AvatarImage
-          width={width}
-          height={height}
+          width={200}
+          height={200}
           src={image}
           alt={name || email || "User Avatar"}
         />

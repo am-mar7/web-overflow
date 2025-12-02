@@ -52,6 +52,17 @@ interface Answer {
   createdAt: Date;
 }
 
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  bio?: string;
+  image?: string;
+  portfolio?: string;
+  reputation?: number;
+  createdAt: Date;
+}
+
 // params 
 
 interface SignInWithOauthParams {

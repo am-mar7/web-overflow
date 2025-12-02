@@ -95,7 +95,7 @@ export default function DataRenderer<T>({
       alt: "illustration",
     }}
     title={empty.title || "Ops..."}
-    message={JSON.stringify(empty.message)}
+    message={empty.message}
     button={empty.button}
   />
   }
