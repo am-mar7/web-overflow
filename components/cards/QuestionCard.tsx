@@ -6,6 +6,7 @@ import { Question } from "@/Types/global";
 import Link from "next/link";
 import CollectionBtn from "../CollectionBtn";
 import { hasSavedQuestion } from "@/lib/server actions/collection.action";
+import UserAvatar from "../UserAvatar";
 
 export default function QuestionCard({
   question,
@@ -25,15 +26,17 @@ export default function QuestionCard({
   const hasSavedPromise = hasSavedQuestion(question._id);
   return (
     <div className="bg-light800_dark200 space-y-3 px-8 py-5 w-full rounded-lg">
-      <span className="subtle-regular text-light-500">
-        {getTimeStamp(createdAt)}
-      </span>
-      <div className="h3-semibold text-dark200_light800 mt-2 flex-between">
-        <Link href={ROUTES.QUESTION(_id)}>{title}</Link>
+      <div className="h3-semibold text-dark200_light800 flex-between">
+        <span className="subtle-regular text-light-500">
+          {getTimeStamp(createdAt)}
+        </span>
         <CollectionBtn
           questionId={question._id}
           hasSavedPromise={hasSavedPromise}
         />
+      </div>
+      <div className="my-2">
+        <Link href={ROUTES.QUESTION(_id)}>{title}</Link>
       </div>
       <div className="flex flex-wrap gap-3">
         {tags.map((tag) => {
@@ -41,12 +44,14 @@ export default function QuestionCard({
         })}
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-3">
-        <Metric
-          iconUrl={author.image!}
-          href={ROUTES.PROFILE(author._id)}
-          value={author.name}
-          alt={author.name}
-        />
+        <Link className="flex-center gap-2" href={ROUTES.PROFILE(author._id)}>
+          <UserAvatar
+            user={{ id: author?._id, ...author }}
+            width={6}
+            height={6}
+          />
+          <p className="body-bold">{author?.name}</p>
+        </Link>
         <div className="flex gap-3 small-medium text-dark400_light800">
           {metricships.map((ship) => {
             return (
