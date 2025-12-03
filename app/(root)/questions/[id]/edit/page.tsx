@@ -9,10 +9,9 @@ export default async function EditQuestion({ params }: RouteParams) {
   const { id } = await params;
   if (!id) return notFound();
 
-  const session = await auth();
-  if (!session?.user) return redirect(ROUTES.SIGN_IN);
+  const [session,{data:question , success}] = await Promise.all([auth() , getQuestion(id)])
 
-  const {data:question , success} = await getQuestion(id);
+  if (!session?.user) return redirect(ROUTES.SIGN_IN);
  
   if(!success) return notFound();
 

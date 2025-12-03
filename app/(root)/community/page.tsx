@@ -8,18 +8,18 @@ import ROUTES from "@/constants/routes";
 import { getUsers } from "@/lib/server actions/user.action";
 import { RouteParams } from "@/Types/global";
 
-
-export default async function Community({ params }: RouteParams) {
-  const { query, filter , page} = await params;
+export default async function Community({ searchParams }: RouteParams) {
+  const { query, filter, page } = await searchParams;
   const { success, data, error } = await getUsers({
     query,
     filter,
+    page: Number(page) || 1,
   });
-  const { users , isNext } = data || {};
+  const { users, isNext } = data || {};
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <h1 className="h1-bold text-dark200_light800">All users</h1>
-      
+
       <section className="mt-6 flex-center flex-col sm:flex-row gap-2.5">
         <div className="w-full">
           <LocalSearch
@@ -48,7 +48,7 @@ export default async function Community({ params }: RouteParams) {
         />
       </div>
 
-      <Pagination isNext={isNext || false} page={page}/>
+      <Pagination isNext={isNext || false} page={page} />
     </div>
   );
 }

@@ -1,20 +1,24 @@
 import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
 import CommentFilters from "@/components/filters/CommentFilters";
+import { HomePageFilters } from "@/components/filters/HomeFilters";
 import Pagination from "@/components/Pagination";
 import LocalSearch from "@/components/searchbars/LocalSearch";
-import { TagFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
 import { getTagQuestions } from "@/lib/server actions/tag.action";
 import { RouteParams } from "@/Types/global";
 
 export default async function Tag({ params, searchParams }: RouteParams) {
-  const { id } = await params;
-  const { page, query } = await searchParams;
+  const [{ id }, { page, query, filter }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+
   const { data, success, error } = await getTagQuestions({
     page: Number(page) || 1,
     pageSize: 10,
     query,
+    filter,
     tagId: id,
   });
   const { isNext, data: questions } = data || {};
@@ -26,7 +30,7 @@ export default async function Tag({ params, searchParams }: RouteParams) {
           <LocalSearch route={ROUTES.TAG(id)} placeholder="search for tag..." />
         </div>
         <CommentFilters
-          filters={TagFilters}
+          filters={HomePageFilters}
           otherClasses="w-full sm:w-fit h-full"
         />
       </section>

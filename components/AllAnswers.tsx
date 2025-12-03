@@ -1,20 +1,23 @@
-import { ActionResponse, Answer } from "@/Types/global";
 import DataRenderer from "./DataRenderer";
+import Pagination from "./Pagination";
 import AnswerCard from "./cards/AnswerCard";
 import CommentFilters from "./filters/CommentFilters";
 import { AnswerFilters } from "@/constants";
+import { getAnswers } from "@/lib/server actions/answer.action";
 
-interface Props extends ActionResponse<Answer[]> {
-  page?: number;
-  isNext?: boolean;
-  totalAnswers?: number;
+interface Props {
+  page?: number | string;
+  filter?: string;
+  questionId: string;
 }
-export default function AllAnswers({
-  data,
-  totalAnswers,
-  success,
-  error,
-}: Props) {
+export default async function AllAnswers({ page = 1, questionId , filter}: Props) {
+  const { data, success, error } = await getAnswers({
+    questionId,
+    filter,
+    pageSize: 3,
+    page: Number(page) || 1,
+  });
+  const { totalAnswers, answers, isNext } = data || {};
   return (
     <div>
       <div className="flex-between">
@@ -28,7 +31,7 @@ export default function AllAnswers({
         <DataRenderer
           success={success}
           error={error}
-          data={data}
+          data={answers}
           empty={{
             title: "No answers yet !",
             message: "be first one to help this developr",
@@ -37,6 +40,8 @@ export default function AllAnswers({
             data?.map((answer) => <AnswerCard {...answer} key={answer._id} />)
           }
         />
+
+        <Pagination isNext={isNext || false} page={page} />
       </section>
     </div>
   );

@@ -6,9 +6,13 @@ import { getTags } from "@/lib/server actions/tag.action";
 import { getHotQuestions } from "@/lib/server actions/question.action";
 
 export default async function Rightbar() {
-  const { data } = await getTags({});
+  const [{ data }, { data: hotQuestions }] = await Promise.all([
+    getTags({}),
+    getHotQuestions(),
+  ]);
+
   const { data: popularTags } = data || {};
-  const { data: hotQuestions } = await getHotQuestions();
+
   return (
     <section className="hidden fixed right-0 top-0 pt-26 h-screen lg:flex flex-col bg-light900_dark200 shadow-light-400 shadow-sm dark:shadow-none custom-scrollbar overflow-y-auto light-border border-r lg:w-[260px] xl:w-[340px]">
       <div className="px-8 py-4">

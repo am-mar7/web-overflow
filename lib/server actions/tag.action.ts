@@ -86,10 +86,27 @@ export async function getTagQuestions(
   if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
 
-  const { page = 1, pageSize = 10, query, tagId } = params;
+  const { page = 1, pageSize = 10, query, tagId , filter} = params;
   const skip = (Number(page) - 1) * pageSize;
 
+  let sortCriteria = {};
+
   try {
+
+    if (filter === "recommended") {
+      return { success: true, data: { data: [], isNext: false } };
+    }
+    switch (filter) {
+      case "newest":
+        sortCriteria = { createdAt: -1 };
+        break;
+      case "unanswered":
+        sortCriteria = { answers: -1 };
+        break;
+      case "popular":
+        sortCriteria = { upvotes: -1 };
+    }
+
     const tag = await tagModel.findById(tagId);
     if (!tag) throw new NotFoundError("Tag");
 
@@ -108,6 +125,7 @@ export async function getTagQuestions(
       .find(filterQuery)
       .populate("author")
       .populate("tags")
+      .sort(sortCriteria)
       .skip(skip)
       .limit(pageSize);
     const isNext = questionsCount > questions.length + skip;

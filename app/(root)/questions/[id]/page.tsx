@@ -4,11 +4,9 @@ import CollectionBtn from "@/components/CollectionBtn";
 import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
-import Pagination from "@/components/Pagination";
 import UserAvatar from "@/components/UserAvatar";
 import Vote from "@/components/Vote";
 import ROUTES from "@/constants/routes";
-import { getAnswers } from "@/lib/server actions/answer.action";
 import { hasSavedQuestion } from "@/lib/server actions/collection.action";
 import { getQuestion } from "@/lib/server actions/question.action";
 import { hasVoted } from "@/lib/server actions/vote.action";
@@ -22,21 +20,11 @@ export default async function QuestionDetails({
   params,
   searchParams,
 }: RouteParams) {
-  const { id } = await params;
-  const { page } = await searchParams;
+  const [{ id }, { page , filter}] = await Promise.all([params, searchParams]);
+
   const { success, data: question } = await getQuestion(id);
   if (!success || !question) return notFound();
 
-  const {
-    data,
-    success: answerSuccess,
-    error,
-  } = await getAnswers({
-    questionId: question._id,
-    pageSize: 3,
-    page: Number(page) || 1,
-  });
-  const isNext = data?.isNext;
   const {
     upvotes,
     views,
@@ -136,15 +124,7 @@ export default async function QuestionDetails({
       </section>
 
       <section className="mb-5">
-        <AllAnswers
-          data={data?.answers}
-          isNext={data?.isNext}
-          error={error}
-          success={answerSuccess}
-          totalAnswers={data?.totalAnswers}
-        />
-
-        <Pagination isNext={isNext || false} page={page} />
+        <AllAnswers page={page} questionId={question._id} filter={filter} />
       </section>
 
       <section>
