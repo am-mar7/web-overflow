@@ -1,6 +1,7 @@
 import TagCard from "@/components/cards/TagCard";
 import DataRenderer from "@/components/DataRenderer";
 import CommentFilters from "@/components/filters/CommentFilters";
+import Pagination from "@/components/Pagination";
 import LocalSearch from "@/components/searchbars/LocalSearch";
 import { TagFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
@@ -15,7 +16,7 @@ export default async function Tags({ searchParams }: RouteParams) {
     query,
     filter,
   });
-  const { data: popularTags } = data || {};
+  const { data: popularTags, isNext } = data || {};
 
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
@@ -60,6 +61,8 @@ export default async function Tags({ searchParams }: RouteParams) {
           )}
         />
       </div>
+
+      <Pagination isNext={isNext || false} page={page} />
     </div>
   );
 }

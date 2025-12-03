@@ -2,6 +2,7 @@ import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
 import CommentFilters from "@/components/filters/CommentFilters";
 import HomeFilters, { HomePageFilters } from "@/components/filters/HomeFilters";
+import Pagination from "@/components/Pagination";
 import LocalSearch from "@/components/searchbars/LocalSearch";
 import { Button } from "@/components/ui/button";
 import ROUTES from "@/constants/routes";
@@ -18,7 +19,7 @@ export default async function Home({ searchParams }: RouteParams) {
     filter,
   });
 
-  const { questions } = data || {};
+  const { questions , isNext } = data || {};
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex gap-5 flex-col-reverse sm:flex-row justify-between">
@@ -59,6 +60,8 @@ export default async function Home({ searchParams }: RouteParams) {
           </section>
         )}
       />
+
+      <Pagination isNext={isNext || false} page={page} />
     </div>
   );
 }

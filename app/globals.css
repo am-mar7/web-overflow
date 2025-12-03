@@ -155,6 +155,9 @@
 @utility bg-light800_dark200{
   @apply bg-light-800 dark:bg-dark-200;
 }
+@utility bg-light700_dark200{
+  @apply bg-light-700 dark:bg-dark-200;
+}
 @utility bg-primary-gradient {
   background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
 }

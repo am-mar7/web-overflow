@@ -4,6 +4,7 @@ import CollectionBtn from "@/components/CollectionBtn";
 import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
+import Pagination from "@/components/Pagination";
 import UserAvatar from "@/components/UserAvatar";
 import Vote from "@/components/Vote";
 import ROUTES from "@/constants/routes";
@@ -17,9 +18,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function QuestionDetails({ params }: RouteParams) {
+export default async function QuestionDetails({
+  params,
+  searchParams,
+}: RouteParams) {
   const { id } = await params;
-
+  const { page } = await searchParams;
   const { success, data: question } = await getQuestion(id);
   if (!success || !question) return notFound();
 
@@ -27,8 +31,12 @@ export default async function QuestionDetails({ params }: RouteParams) {
     data,
     success: answerSuccess,
     error,
-  } = await getAnswers({ questionId: question._id, pageSize: 3 });
-
+  } = await getAnswers({
+    questionId: question._id,
+    pageSize: 3,
+    page: Number(page) || 1,
+  });
+  const isNext = data?.isNext;
   const {
     upvotes,
     views,
@@ -135,6 +143,8 @@ export default async function QuestionDetails({ params }: RouteParams) {
           success={answerSuccess}
           totalAnswers={data?.totalAnswers}
         />
+
+        <Pagination isNext={isNext || false} page={page} />
       </section>
 
       <section>

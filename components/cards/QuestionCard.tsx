@@ -44,7 +44,7 @@ export default function QuestionCard({
         })}
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-3">
-        <Link className="flex-center gap-2" href={ROUTES.PROFILE(author._id)}>
+        <Link className="flex items-center gap-2" href={ROUTES.PROFILE(author._id)}>
           <UserAvatar
             user={{ id: author?._id, ...author }}
             width={6}
