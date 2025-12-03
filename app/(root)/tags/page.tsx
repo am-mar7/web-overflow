@@ -1,12 +1,14 @@
 import TagCard from "@/components/cards/TagCard";
 import DataRenderer from "@/components/DataRenderer";
+import CommentFilters from "@/components/filters/CommentFilters";
 import LocalSearch from "@/components/searchbars/LocalSearch";
+import { TagFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
 import { getTags } from "@/lib/server actions/tag.action";
 import { RouteParams } from "@/Types/global";
 
 export default async function Tags({ searchParams }: RouteParams) {
-  const { page , pageSize , query , filter } = await searchParams;
+  const { page, pageSize, query, filter } = await searchParams;
   const { data, success, error } = await getTags({
     page: Number(page) || 1,
     pageSize: Number(pageSize) || 10,
@@ -19,10 +21,15 @@ export default async function Tags({ searchParams }: RouteParams) {
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <h1 className="h1-bold text-dark200_light800"> All Tags</h1>
 
-      <section className="mt-6">
-        <LocalSearch route={ROUTES.TAGS} placeholder="search for a tags" />
+      <section className="mt-6 flex-center flex-col sm:flex-row gap-2.5">
+        <div className="w-full">
+          <LocalSearch route={ROUTES.TAGS} placeholder="search for a tags" />
+        </div>
+        <CommentFilters
+          filters={TagFilters}
+          otherClasses="w-full sm:w-fit h-full"
+        />
       </section>
-
       <div className="py-4 grid sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-2">
         <DataRenderer
           success={success}

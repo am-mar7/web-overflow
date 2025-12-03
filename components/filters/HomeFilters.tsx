@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formUrlQuery, removeKeysFromUrlQuery } from "@/lib/urls";
 import { cn } from "@/lib/utils";
-const filters = [
+export const HomePageFilters = [
   { name: "Newest", value: "newest" },
   { name: "Popular", value: "popular" },
   { name: "Unanswered", value: "unanswered" },
@@ -38,7 +38,7 @@ export default function HomeFilters() {
   return (
     <div>
       <div className="flex gap-3 mt-6 max-sm:hidden">
-        {filters.map((filter) => {
+        {HomePageFilters.map((filter) => {
           return (
             <Button
               key={filter.value}

@@ -25,7 +25,7 @@ export default function QuestionCard({
 
   const hasSavedPromise = hasSavedQuestion(question._id);
   return (
-    <div className="bg-light800_dark200 space-y-3 px-8 py-5 w-full rounded-lg">
+    <div className="bg-light800_dark200 shadow-md dark:shadow-none space-y-3 px-8 py-5 w-full rounded-lg">
       <div className="h3-semibold text-dark200_light800 flex-between">
         <span className="subtle-regular text-light-500">
           {getTimeStamp(createdAt)}

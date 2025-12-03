@@ -1,6 +1,8 @@
 import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
+import CommentFilters from "@/components/filters/CommentFilters";
 import LocalSearch from "@/components/searchbars/LocalSearch";
+import { CollectionFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
 import { getCollections } from "@/lib/server actions/collection.action";
 import { RouteParams } from "@/Types/global";
@@ -14,17 +16,22 @@ export default async function Collection({ searchParams }: RouteParams) {
     filter,
   });
 
-  const { questions  } = data || {};
+  const { questions } = data || {};
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex gap-5 flex-col-reverse sm:flex-row justify-between">
         <h1 className="h1-bold text-dark200_light800"> Saved Questions</h1>
       </section>
 
-      <section className="mt-6">
-        <LocalSearch route={ROUTES.COLLECTIONS} placeholder="search for a saved Question..." />
+      <section className="mt-6 flex-center flex-col sm:flex-row gap-2.5">
+        <div className="w-full">
+          <LocalSearch
+            route={ROUTES.COLLECTIONS}
+            placeholder="search for a saved Question..."
+          />
+        </div>
+       <CommentFilters filters={CollectionFilters} otherClasses="w-full sm:w-fit h-full"/>
       </section>
-
 
       <DataRenderer
         success={success}
@@ -50,4 +57,3 @@ export default async function Collection({ searchParams }: RouteParams) {
     </div>
   );
 }
-

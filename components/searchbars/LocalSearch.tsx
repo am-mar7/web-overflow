@@ -43,7 +43,7 @@ export default function LocalSearch({
 }, [query, pathName, route]);
 
   return (
-    <div className="flex gap-4 p-4 bg-light800_darkgradient rounded-lg shadow-light-300 dark:shadow-none">
+    <div className="bg-light800_dark200! flex gap-4 p-4 bg-light800_darkgradient rounded-lg shadow-md dark:shadow-none">
       <Image src="icons/search.svg" alt="search icon" width={25} height={25} />
       <Input
         onChange={(e) => setQuery(e.target.value)}

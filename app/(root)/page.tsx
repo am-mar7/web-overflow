@@ -1,6 +1,7 @@
 import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
-import HomeFilters from "@/components/filters/HomeFilters";
+import CommentFilters from "@/components/filters/CommentFilters";
+import HomeFilters, { HomePageFilters } from "@/components/filters/HomeFilters";
 import LocalSearch from "@/components/searchbars/LocalSearch";
 import { Button } from "@/components/ui/button";
 import ROUTES from "@/constants/routes";
@@ -37,7 +38,7 @@ export default async function Home({ searchParams }: RouteParams) {
       </section>
 
       <HomeFilters />
-
+      <CommentFilters filters={HomePageFilters} otherClasses="sm:hidden mt-5" />
       <DataRenderer
         success={success}
         error={error}
