@@ -33,7 +33,7 @@ export default function Pagination({ isNext, page = 1 }: Props) {
     router.push(newUrl);
   };
 
-  // if(page === 1 && !isNext) return null;
+  if(page === 1 && !isNext) return null;
 
   return (
     <div className="w-full flex-center gap-3.5 mt-8">

@@ -18,9 +18,9 @@ export default function QuestionCard({
   console.log(author);
 
   const metricships = [
-    { iconUrl: "icons/like.svg", value: upvotes, alt: "votes" },
-    { iconUrl: "icons/eye.svg", value: views, alt: "views" },
-    { iconUrl: "icons/message.svg", value: answers, alt: "answers" },
+    { iconUrl: "/icons/like.svg", value: upvotes, alt: "votes" },
+    { iconUrl: "/icons/eye.svg", value: views, alt: "views" },
+    { iconUrl: "/icons/message.svg", value: answers, alt: "answers" },
   ];
 
   const hasSavedPromise = hasSavedQuestion(question._id);
