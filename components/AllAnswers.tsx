@@ -1,6 +1,8 @@
 import { ActionResponse, Answer } from "@/Types/global";
 import DataRenderer from "./DataRenderer";
 import AnswerCard from "./cards/AnswerCard";
+import CommentFilters from "./filters/CommentFilters";
+import { AnswerFilters } from "@/constants";
 
 interface Props extends ActionResponse<Answer[]> {
   page?: number;
@@ -9,11 +11,9 @@ interface Props extends ActionResponse<Answer[]> {
 }
 export default function AllAnswers({
   data,
-  isNext,
   totalAnswers,
   success,
   error,
-  page,
 }: Props) {
   return (
     <div>
@@ -21,7 +21,7 @@ export default function AllAnswers({
         <h3 className="text-primary-gradient body-regular">
           {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
         </h3>
-        <span>filters</span>
+        <CommentFilters filters={AnswerFilters} otherClasses="" />
       </div>
 
       <section className="mt-6 space-y-12">
@@ -33,7 +33,9 @@ export default function AllAnswers({
             title: "No answers yet !",
             message: "be first one to help this developr",
           }}
-          render={(data) => data?.map((answer) => <AnswerCard {...answer} key={answer._id}/>)}
+          render={(data) =>
+            data?.map((answer) => <AnswerCard {...answer} key={answer._id} />)
+          }
         />
       </section>
     </div>

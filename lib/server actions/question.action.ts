@@ -20,6 +20,8 @@ import mongoose, { ObjectId } from "mongoose";
 import TagQuestion, { ITagQuestion } from "@/models/tag-question.model";
 import Tag, { ITagDoc } from "@/models/tag.model";
 import { NotFoundError, UnauthorizedError } from "../http-errors";
+import { dbConnect } from "../mongoose";
+import { revalidatePath } from "next/cache";
 
 export async function createQuestion(
   params: QuestionParams
@@ -76,6 +78,8 @@ export async function createQuestion(
       { session }
     );
     await session.commitTransaction();
+    
+    revalidatePath("/" , "layout");
 
     return {
       success: true,
@@ -178,6 +182,9 @@ export async function updateQuestion(
 
     await session.commitTransaction();
     await question.save();
+
+    revalidatePath("/" , "layout");
+
     return {
       success: true,
       data: JSON.parse(JSON.stringify(question)),
@@ -257,7 +264,9 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
       ];
     }
 
-    const questionCount = await questionModel.find(filterQuery).countDocuments();
+    const questionCount = await questionModel
+      .find(filterQuery)
+      .countDocuments();
     const skip = (page - 1) * pageSize;
     const questions = await questionModel
       .find(filterQuery)
@@ -276,6 +285,21 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
         isNext,
       },
     };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getHotQuestions(): Promise<ActionResponse<Question[]>> {
+  try {
+    await dbConnect();
+
+    const questions = await questionModel
+      .find()
+      .sort({ upvotes: -1, views: -1 })
+      .limit(5);
+
+    return { success: true, data: questions };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }

@@ -262,3 +262,8 @@ export const GlobalSearchFilters = [
   { name: "Tag", value: "tag" },
 ];
 
+export const AnswerFilters = [
+  { name: "Newest", value: "latest" },
+  { name: "Oldest", value: "oldest" },
+  { name: "Popular", value: "popular" },
+];

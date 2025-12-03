@@ -50,7 +50,7 @@ export default function AnswerForm({
     });
 
     if (success) {
-      editorRef.current?.setMarkdown("");
+      editorRef.current?.setMarkdown("");      
       toast.success("answer posted successfully", { duration: 3000 });
     } else {
       console.log(error);
@@ -85,6 +85,7 @@ export default function AnswerForm({
       return;
     }
     editorRef.current?.setMarkdown(data);
+    form.setValue("content", data);
   };
 
   return (
