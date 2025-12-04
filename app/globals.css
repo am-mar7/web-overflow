@@ -158,6 +158,9 @@
 @utility bg-light700_dark200{
   @apply bg-light-700 dark:bg-dark-200;
 }
+@utility bg-light700_dark300{
+  @apply bg-light-700 dark:bg-dark-300;
+}
 @utility bg-primary-gradient {
   background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
 }
@@ -220,6 +223,9 @@
 }
 @utility btn-secondary {
   @apply bg-light-700! dark:bg-dark-400!;
+}
+@utility tab {
+  @apply min-h-full! dark:bg-dark-400! bg-light-800! text-light-500! dark:data-[state=active]:bg-dark-300! data-[state=active]:bg-primary-100! data-[state=active]:text-primary-500!;
 }
 @utility btn-tertiary {
   @apply bg-light-700! dark:bg-dark-300!;

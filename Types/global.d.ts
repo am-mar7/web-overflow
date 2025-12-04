@@ -139,3 +139,15 @@ interface HasVotedResponse{
   hasUpvoted: boolean;
   hasDownvoted: boolean;
 }
+
+interface getUserQuestionsParams extends PaginatedSearchParams{
+  userId: string;
+}
+
+interface getUserAnswersParams extends PaginatedSearchParams{
+  userId: string;
+}
+
+interface getUserTagsParams extends PaginatedSearchParams{
+  userId: string;
+}

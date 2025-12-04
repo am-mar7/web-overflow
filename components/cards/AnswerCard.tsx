@@ -7,14 +7,20 @@ import ROUTES from "@/constants/routes";
 import Vote from "../Vote";
 import { hasVoted } from "@/lib/server actions/vote.action";
 
+interface Props extends Answer {
+  readMore?: boolean;
+}
+
 export default function AnswerCard({
   _id,
+  readMore = false,
   author,
   content,
   createdAt,
   upvotes,
+  question,
   downvotes,
-}: Answer) {
+}: Props) {
   const date = getTimeStamp(createdAt);
 
   const hasVotedPromise = hasVoted({
@@ -23,7 +29,8 @@ export default function AnswerCard({
   });
 
   return (
-    <article>
+    <article className="bg-light700_dark300 shadow-md dark:shadow-none px-5 py-2.5 rounded-lg">
+      <span id={`answer-${_id}`}></span>
       <div className="flex-between">
         <div className="flex item-center gap-2 mb-5">
           <Link href={ROUTES.PROFILE(author._id)} className="mt-2.5">
@@ -50,6 +57,10 @@ export default function AnswerCard({
       </div>
 
       <Preview content={content} />
+
+      {readMore && (
+        <Link className="text-sky-600" href={`/questions/${question}#answer-${_id}`}>read more...</Link>
+      )}
     </article>
   );
 }

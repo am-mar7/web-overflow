@@ -20,7 +20,7 @@ export default async function QuestionDetails({
   params,
   searchParams,
 }: RouteParams) {
-  const [{ id }, { page , filter}] = await Promise.all([params, searchParams]);
+  const [{ id }, { page, filter }] = await Promise.all([params, searchParams]);
 
   const { success, data: question } = await getQuestion(id);
   if (!success || !question) return notFound();
@@ -67,61 +67,63 @@ export default async function QuestionDetails({
 
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
-      <section className="flex-between">
-        <Link className="flex-center gap-2" href={ROUTES.PROFILE(author._id)}>
-          <UserAvatar
-            user={{ id: author?._id, ...author }}
-            width={6}
-            height={6}
-          />
-          <p className="body-bold">{author?.name}</p>
-        </Link>
+      <div className="bg-light700_dark300 px-5 py-2.5 rounded-lg shadow-md dark:shadow-none">
+        <section className="flex-between">
+          <Link className="flex-center gap-2" href={ROUTES.PROFILE(author._id)}>
+            <UserAvatar
+              user={{ id: author?._id, ...author }}
+              width={6}
+              height={6}
+            />
+            <p className="body-bold">{author?.name}</p>
+          </Link>
 
-        <div className="flex-center gap-3">
-          <Vote
-            upvotes={upvotes}
-            downvotes={downvotes}
-            targetId={question._id}
-            targetType="question"
-            hasVotedPromise={hasVotedPromise}
-          />
+          <div className="flex-center gap-3">
+            <Vote
+              upvotes={upvotes}
+              downvotes={downvotes}
+              targetId={question._id}
+              targetType="question"
+              hasVotedPromise={hasVotedPromise}
+            />
 
-          <CollectionBtn
-            questionId={question._id}
-            hasSavedPromise={hasSavedPromise}
-          />
-        </div>
-      </section>
+            <CollectionBtn
+              questionId={question._id}
+              hasSavedPromise={hasSavedPromise}
+            />
+          </div>
+        </section>
 
-      <section className="py-5 text-dark200_light800 h1-semibold">
-        <p>{title}</p>
+        <section className="py-5 text-dark200_light800 h1-semibold">
+          <p>{title}</p>
 
-        <div className="flex gap-3 small-medium text-dark400_light800 mt-3">
-          {timeMertic}
-          {metricships.map((ship) => {
-            return (
-              <div className="flex-center gap-1" key={ship.alt}>
-                <Metric
-                  key={ship.value}
-                  value={ship.value}
-                  iconUrl={ship.iconUrl}
-                  alt={ship.alt}
-                />
+          <div className="flex gap-3 small-medium text-dark400_light800 mt-3">
+            {timeMertic}
+            {metricships.map((ship) => {
+              return (
+                <div className="flex-center gap-1" key={ship.alt}>
+                  <Metric
+                    key={ship.value}
+                    value={ship.value}
+                    iconUrl={ship.iconUrl}
+                    alt={ship.alt}
+                  />
 
-                <span>{ship.alt}</span>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+                  <span>{ship.alt}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
-      <Preview content={content} />
+        <Preview content={content} />
 
-      <section className="flex gap-2 mb-5">
-        {tags.map((t) => (
-          <TagCard key={t._id} id={t._id} name={t.name} />
-        ))}
-      </section>
+        <section className="flex gap-2 mb-5">
+          {tags.map((t) => (
+            <TagCard key={t._id} id={t._id} name={t.name} />
+          ))}
+        </section>
+      </div>
 
       <section className="mb-5">
         <AllAnswers page={page} questionId={question._id} filter={filter} />
