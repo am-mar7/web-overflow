@@ -1,3 +1,5 @@
+import { IInteractionDoc } from "@/models/interaction.model";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 interface ActionResponse<T = null> {
@@ -69,7 +71,7 @@ interface Collection {
   question: Question;
 }
 
-// params 
+// params
 
 interface SignInWithOauthParams {
   provider: "google" | "github";
@@ -125,37 +127,59 @@ interface RouteParams {
 
 interface createVoteParams {
   targetId: string;
-  targetType: "question"|"answer";
-  voteType: "upvote"|"downvote";
+  targetType: "question" | "answer";
+  voteType: "upvote" | "downvote";
 }
 
-interface updateVoteParams extends createVoteParams{
+interface updateVoteParams extends createVoteParams {
   change: number;
 }
 
-type hasVotedParams = Pick<createVoteParams , "targetId"|"targetType">;
+type hasVotedParams = Pick<createVoteParams, "targetId" | "targetType">;
 
-interface HasVotedResponse{
+interface HasVotedResponse {
   hasUpvoted: boolean;
   hasDownvoted: boolean;
 }
 
-interface getUserQuestionsParams extends PaginatedSearchParams{
+interface getUserQuestionsParams extends PaginatedSearchParams {
   userId: string;
 }
 
-interface getUserAnswersParams extends PaginatedSearchParams{
+interface getUserAnswersParams extends PaginatedSearchParams {
   userId: string;
 }
 
-interface getUserTagsParams extends PaginatedSearchParams{
+interface getUserTagsParams extends PaginatedSearchParams {
   userId: string;
 }
 
-interface deleteQuestionParams{
+interface deleteQuestionParams {
   questionId: string;
 }
 
-interface deleteAnswerParams{
+interface deleteAnswerParams {
   answerId: string;
+}
+
+interface createInteractionParams {
+  actionId: string;
+  authorId: string;
+  actionType: "question" | "answer";
+  action:
+    | "view"
+    | "upvote"
+    | "downvote"
+    | "bookmark"
+    | "post"
+    | "edit"
+    | "delete"
+    | "search";
+}
+
+interface updateReputationParams {
+  authorId: string;
+  performerId: string;
+  interaction: IInteractionDoc;
+  session: mongoose.ClientSession;
 }

@@ -1,3 +1,4 @@
+import { InteractionActionEnums } from "@/models/interaction.model";
 import { z } from "zod";
 
 export const SignInSchema = z.object({
@@ -169,27 +170,34 @@ export const hasVotedSchema = createVoteSchema.pick({
   targetType: true,
 });
 
-export const CollectionSchema =  getQuestionSchema.extend({});
+export const CollectionSchema = getQuestionSchema.extend({});
 
 export const getUserSchema = z.object({
-  userId : z.string().min(1, "use Id is required"),
+  userId: z.string().min(1, "use Id is required"),
 });
 
-export const getUserQuestionsSchema =  PaginatedSearchParamsSchema.extend({
-  userId : z.string().min(1, "use Id is required"),
+export const getUserQuestionsSchema = PaginatedSearchParamsSchema.extend({
+  userId: z.string().min(1, "use Id is required"),
 });
 
-export const getUserAnswersSchema =  PaginatedSearchParamsSchema.extend({
-  userId : z.string().min(1, "use Id is required"),
+export const getUserAnswersSchema = PaginatedSearchParamsSchema.extend({
+  userId: z.string().min(1, "use Id is required"),
 });
 
-export const getUserTagsSchema =  PaginatedSearchParamsSchema.extend({
-  userId : z.string().min(1, "use Id is required"),
+export const getUserTagsSchema = PaginatedSearchParamsSchema.extend({
+  userId: z.string().min(1, "use Id is required"),
 });
-export const deleteQuestionSchema =  z.object({
-  questionId : z.string().min(1, "question Id is required"),
+export const deleteQuestionSchema = z.object({
+  questionId: z.string().min(1, "question Id is required"),
 });
 
-export const deleteAnswerSchema =  z.object({
-  answerId : z.string().min(1, "answer Id is required"),
+export const deleteAnswerSchema = z.object({
+  answerId: z.string().min(1, "answer Id is required"),
+});
+
+export const createInteractionSchema = z.object({
+  actionId: z.string().min(1, "action Id is required"),
+  authorId: z.string().min(1, "author Id is required"),
+  actionType: z.enum(["question", "answer"]),
+  action: z.enum(InteractionActionEnums),
 });
