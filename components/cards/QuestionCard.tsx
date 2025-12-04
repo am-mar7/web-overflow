@@ -7,6 +7,7 @@ import Link from "next/link";
 import CollectionBtn from "../CollectionBtn";
 import { hasSavedQuestion } from "@/lib/server actions/collection.action";
 import UserAvatar from "../UserAvatar";
+import ActionsButton from "../user/ActionsButton";
 
 export default function QuestionCard({
   question,
@@ -15,7 +16,6 @@ export default function QuestionCard({
 }) {
   const { _id, upvotes, views, answers, createdAt, title, author, tags } =
     question;
-  console.log(author);
 
   const metricships = [
     { iconUrl: "/icons/like.svg", value: upvotes, alt: "votes" },
@@ -25,15 +25,18 @@ export default function QuestionCard({
 
   const hasSavedPromise = hasSavedQuestion(question._id);
   return (
-    <div className="bg-light800_dark200 shadow-md dark:shadow-none space-y-3 px-8 py-5 w-full rounded-lg">
-      <div className="h3-semibold text-dark200_light800 flex-between">
+    <div className="bg-light800_dark200 space-y-3 shadow-md dark:shadow-none px-8 py-5 w-full rounded-lg">
+      <div className="h3-semibold text-dark200_light800 flex items-center justify-between">
         <span className="subtle-regular text-light-500">
           {getTimeStamp(createdAt)}
         </span>
-        <CollectionBtn
-          questionId={question._id}
-          hasSavedPromise={hasSavedPromise}
-        />
+        <div className="flex-center gap-2">
+          <ActionsButton type="question" id={question._id} authorId={question.author._id} />
+          <CollectionBtn
+            questionId={question._id}
+            hasSavedPromise={hasSavedPromise}
+          />
+        </div>
       </div>
       <div className="my-2">
         <Link href={ROUTES.QUESTION(_id)}>{title}</Link>
@@ -44,7 +47,10 @@ export default function QuestionCard({
         })}
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-3">
-        <Link className="flex items-center gap-2" href={ROUTES.PROFILE(author._id)}>
+        <Link
+          className="flex items-center gap-2"
+          href={ROUTES.PROFILE(author._id)}
+        >
           <UserAvatar
             user={{ id: author?._id, ...author }}
             width={6}

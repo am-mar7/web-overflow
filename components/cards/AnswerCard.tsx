@@ -6,6 +6,7 @@ import Link from "next/link";
 import ROUTES from "@/constants/routes";
 import Vote from "../Vote";
 import { hasVoted } from "@/lib/server actions/vote.action";
+import ActionsButton from "../user/ActionsButton";
 
 interface Props extends Answer {
   readMore?: boolean;
@@ -47,19 +48,29 @@ export default function AnswerCard({
             <p className="small-regular">Answerd {date}</p>
           </div>
         </div>
-        <Vote
-          upvotes={upvotes}
-          downvotes={downvotes}
-          targetId={_id}
-          targetType="answer"
-          hasVotedPromise={hasVotedPromise}
-        />
+        <div>
+          <div className="w-full flex justify-end py-3">
+            <ActionsButton type="answer" id={_id} authorId={author._id} />
+          </div>
+          <Vote
+            upvotes={upvotes}
+            downvotes={downvotes}
+            targetId={_id}
+            targetType="answer"
+            hasVotedPromise={hasVotedPromise}
+          />
+        </div>
       </div>
 
       <Preview content={content} />
 
       {readMore && (
-        <Link className="text-sky-600" href={`/questions/${question}#answer-${_id}`}>read more...</Link>
+        <Link
+          className="text-sky-600"
+          href={`/questions/${question}#answer-${_id}`}
+        >
+          read more...
+        </Link>
       )}
     </article>
   );

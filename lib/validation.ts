@@ -186,3 +186,10 @@ export const getUserAnswersSchema =  PaginatedSearchParamsSchema.extend({
 export const getUserTagsSchema =  PaginatedSearchParamsSchema.extend({
   userId : z.string().min(1, "use Id is required"),
 });
+export const deleteQuestionSchema =  z.object({
+  questionId : z.string().min(1, "question Id is required"),
+});
+
+export const deleteAnswerSchema =  z.object({
+  answerId : z.string().min(1, "answer Id is required"),
+});

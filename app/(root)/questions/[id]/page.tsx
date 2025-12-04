@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import AllAnswers from "@/components/AllAnswers";
 import TagCard from "@/components/cards/TagCard";
 import CollectionBtn from "@/components/CollectionBtn";
@@ -20,11 +21,16 @@ export default async function QuestionDetails({
   params,
   searchParams,
 }: RouteParams) {
-  const [{ id }, { page, filter }] = await Promise.all([params, searchParams]);
+  const [{ id }, { page, filter }, session] = await Promise.all([
+    params,
+    searchParams,
+    auth(),
+  ]);
 
   const { success, data: question } = await getQuestion(id);
   if (!success || !question) return notFound();
 
+  const userId = session?.user?.id;
   const {
     upvotes,
     views,
@@ -91,6 +97,16 @@ export default async function QuestionDetails({
               questionId={question._id}
               hasSavedPromise={hasSavedPromise}
             />
+            {userId === question.author._id && (
+              <Link href={`${ROUTES.QUESTION(id)}/edit`}>
+                <Image
+                  src="/icons/edit.svg"
+                  alt="edit-icon"
+                  width={18}
+                  height={18}
+                />
+              </Link>
+            )}
           </div>
         </section>
 
