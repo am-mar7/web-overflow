@@ -21,7 +21,7 @@ export default async function AllAnswers({ page = 1, questionId , filter}: Props
   return (
     <div>
       <div className="flex-between">
-        <h3 className="text-primary-gradient body-regular">
+        <h3 className="text-primary-gradient body-bold ">
           {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
         </h3>
         <CommentFilters filters={AnswerFilters} otherClasses="" />
