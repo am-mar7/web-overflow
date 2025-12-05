@@ -9,13 +9,17 @@ import UserAvatar from "@/components/UserAvatar";
 import Vote from "@/components/Vote";
 import ROUTES from "@/constants/routes";
 import { hasSavedQuestion } from "@/lib/server actions/collection.action";
-import { getQuestion } from "@/lib/server actions/question.action";
+import {
+  getQuestion,
+  incrementViews,
+} from "@/lib/server actions/question.action";
 import { hasVoted } from "@/lib/server actions/vote.action";
 import { getTimeStamp } from "@/lib/utils";
 import { RouteParams } from "@/Types/global";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 
 export default async function QuestionDetails({
   params,
@@ -29,6 +33,10 @@ export default async function QuestionDetails({
 
   const { success, data: question } = await getQuestion(id);
   if (!success || !question) return notFound();
+
+  after(async () => {
+    if (userId) await incrementViews({ questionId: id, viewer: userId });
+  });
 
   const userId = session?.user?.id;
   const {

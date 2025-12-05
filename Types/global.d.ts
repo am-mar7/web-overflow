@@ -183,3 +183,8 @@ interface updateReputationParams {
   interaction: IInteractionDoc;
   session: mongoose.ClientSession;
 }
+
+interface incrementViewsParams {
+  questionId: string;
+  viewer: string;
+}

@@ -3,6 +3,7 @@ import {
   ActionResponse,
   deleteQuestionParams,
   ErrorResponse,
+  incrementViewsParams,
   PaginatedSearchParams,
   Question,
   QuestionParams,
@@ -14,6 +15,7 @@ import {
   deleteQuestionSchema,
   editQuestionSchema,
   getQuestionSchema,
+  incrementViewsSchema,
   PaginatedSearchParamsSchema,
 } from "../validation";
 import handleError from "../handlers/error";
@@ -24,7 +26,7 @@ import Tag, { ITagDoc } from "@/models/tag.model";
 import { NotFoundError, UnauthorizedError } from "../http-errors";
 import { dbConnect } from "../mongoose";
 import { revalidatePath } from "next/cache";
-import { Answer, Collection, Vote } from "@/models";
+import { Answer, Collection, ViewQuestion, Vote } from "@/models";
 import { IAnswerDoc } from "@/models/answer.model";
 
 export async function createQuestion(
@@ -367,12 +369,45 @@ export async function deleteQuestion(
     await questionModel.findByIdAndDelete(questionId).session(session);
     await session.commitTransaction();
 
-    revalidatePath("/" , "layout");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     await session.abortTransaction();
     return handleError(error) as ErrorResponse;
   } finally {
     await session.endSession();
+  }
+}
+
+export async function incrementViews(
+  params: incrementViewsParams
+): Promise<ActionResponse> {
+  const validate = await actionHandler({
+    params,
+    schema: incrementViewsSchema,
+  });
+  if (validate instanceof Error) return handleError(validate) as ErrorResponse;
+
+  const { questionId, viewer } = validate.params!;
+
+  if (!viewer) return handleError(new UnauthorizedError()) as ErrorResponse;
+
+  try {
+    const existingView = await ViewQuestion.findOne({
+      questionId,
+      viewer,
+    });
+
+    if (existingView) return { success: true };
+
+    const [view] = await ViewQuestion.create([{ questionId, viewer }]);
+    if (!view) throw new Error("Failed to create new view");
+
+    await questionModel.findByIdAndUpdate(questionId, { $inc: { views: 1 } });
+
+    revalidatePath("/", "layout");
+    return { success: true };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
   }
 }
