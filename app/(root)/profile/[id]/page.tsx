@@ -10,7 +10,6 @@ import { RouteParams } from "@/Types/global";
 import { notFound } from "next/navigation";
 import dayjs from "dayjs";
 import StatsCard from "@/components/user/StatsCard";
-import { auth } from "@/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataRenderer from "@/components/DataRenderer";
 import ROUTES from "@/constants/routes";
@@ -20,11 +19,7 @@ import Pagination from "@/components/Pagination";
 import TagCard from "@/components/cards/TagCard";
 
 export default async function Profile({ params, searchParams }: RouteParams) {
-  const [{ id }, session, { page }] = await Promise.all([
-    params,
-    auth(),
-    searchParams,
-  ]);
+  const [{ id }, { page }] = await Promise.all([params, searchParams]);
   const [
     { success, data: user },
     {
@@ -46,7 +41,6 @@ export default async function Profile({ params, searchParams }: RouteParams) {
   const { name, email, bio, createdAt, portfolio } = user || {};
   const { questions, isNext: hasMoreQuestions } = questionsData || {};
   const { answers, isNext: hasMoreAnswers } = answersData || {};
-  const userId = session?.user?.id;
 
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
@@ -60,7 +54,6 @@ export default async function Profile({ params, searchParams }: RouteParams) {
             <p className="font-space-grotesk h3-semibold">{email}</p>
           </div>
         </div>
-        {userId === id && <div>edit button</div>}
       </section>
 
       <section>

@@ -5,6 +5,7 @@ import CollectionBtn from "@/components/CollectionBtn";
 import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
+import ActionsButton from "@/components/user/ActionsButton";
 import UserAvatar from "@/components/UserAvatar";
 import Vote from "@/components/Vote";
 import ROUTES from "@/constants/routes";
@@ -107,14 +108,7 @@ export default async function QuestionDetails({
               hasSavedPromise={hasSavedPromise}
             />
             {userId === question.author._id && (
-              <Link href={`${ROUTES.QUESTION(id)}/edit`}>
-                <Image
-                  src="/icons/edit.svg"
-                  alt="edit-icon"
-                  width={18}
-                  height={18}
-                />
-              </Link>
+              <ActionsButton type="question" authorId={userId} id={id} />
             )}
           </div>
         </section>
