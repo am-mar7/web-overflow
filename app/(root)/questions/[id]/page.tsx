@@ -35,7 +35,8 @@ export default async function QuestionDetails({
   if (!success || !question) return notFound();
 
   after(async () => {
-    if (userId) await incrementViews({ questionId: id, viewer: userId });
+    if (userId && question.author._id !== userId)
+      await incrementViews({ questionId: id, viewer: userId });
   });
 
   const userId = session?.user?.id;
@@ -142,7 +143,7 @@ export default async function QuestionDetails({
 
         <Preview content={content} />
 
-        <section className="flex gap-2 mb-5">
+        <section className="flex gap-2 my-5">
           {tags.map((t) => (
             <TagCard key={t._id} id={t._id} name={t.name} />
           ))}

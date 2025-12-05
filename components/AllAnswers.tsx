@@ -10,7 +10,11 @@ interface Props {
   filter?: string;
   questionId: string;
 }
-export default async function AllAnswers({ page = 1, questionId , filter}: Props) {
+export default async function AllAnswers({
+  page = 1,
+  questionId,
+  filter,
+}: Props) {
   const { data, success, error } = await getAnswers({
     questionId,
     filter,
@@ -20,11 +24,13 @@ export default async function AllAnswers({ page = 1, questionId , filter}: Props
   const { totalAnswers, answers, isNext } = data || {};
   return (
     <div>
-      <div className="flex-between">
+      <div className="flex-between mt-6">
         <h3 className="text-primary-gradient body-bold ">
           {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
         </h3>
-        <CommentFilters filters={AnswerFilters} otherClasses="" />
+        {totalAnswers ? (
+          <CommentFilters filters={AnswerFilters} otherClasses="max-h-[30px]" />
+        ) : null}
       </div>
 
       <section className="mt-6 space-y-12">

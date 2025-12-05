@@ -21,10 +21,10 @@ export default async function Tag({ params, searchParams }: RouteParams) {
     filter,
     tagId: id,
   });
-  const { isNext, data: questions } = data || {};
+  const { isNext, tag, questions } = data || {};
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
-      <h1 className="h1-semibold text-dark200_light800">Tag name</h1>
+      <h1 className="h1-semibold text-dark200_light800">{tag?.name}</h1>
       <section className="mt-6 flex-center flex-col sm:flex-row gap-2.5">
         <div className="w-full">
           <LocalSearch route={ROUTES.TAG(id)} placeholder="search for tag..." />

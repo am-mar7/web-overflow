@@ -43,7 +43,7 @@ export default function QuestionCard({
       </div>
       <div className="flex flex-wrap gap-3">
         {tags.map((tag) => {
-          return <TagCard key={tag._id} id={_id} name={tag.name} />;
+          return <TagCard key={tag._id} id={tag._id} name={tag.name} />;
         })}
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-3">

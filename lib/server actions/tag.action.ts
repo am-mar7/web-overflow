@@ -78,7 +78,9 @@ export async function getTags(
 
 export async function getTagQuestions(
   params: getTagQuestionsParams
-): Promise<ActionResponse<{ isNext: boolean; data: Question[] }>> {
+): Promise<
+  ActionResponse<{ isNext: boolean; questions: Question[]; tag: Tag }>
+> {
   const validated = actionHandler({
     params,
     schema: getTagQuestionsSchema,
@@ -86,15 +88,17 @@ export async function getTagQuestions(
   if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
 
-  const { page = 1, pageSize = 10, query, tagId , filter} = params;
+  const { page = 1, pageSize = 10, query, tagId, filter } = params;
   const skip = (Number(page) - 1) * pageSize;
 
   let sortCriteria = {};
 
   try {
+    const tag = (await tagModel.findById(tagId)) as Tag;
+    if (!tag) throw new NotFoundError("Tag");
 
     if (filter === "recommended") {
-      return { success: true, data: { data: [], isNext: false } };
+      return { success: true, data: { tag, questions: [], isNext: false } };
     }
     switch (filter) {
       case "newest":
@@ -106,9 +110,6 @@ export async function getTagQuestions(
       case "popular":
         sortCriteria = { upvotes: -1 };
     }
-
-    const tag = await tagModel.findById(tagId);
-    if (!tag) throw new NotFoundError("Tag");
 
     const filterQuery: mongoose.QueryFilter<typeof questionModel> = {
       tags: { $in: [tagId] },
@@ -132,7 +133,7 @@ export async function getTagQuestions(
 
     return {
       success: true,
-      data: { isNext, data: JSON.parse(JSON.stringify(questions)) },
+      data: { isNext, questions: JSON.parse(JSON.stringify(questions)), tag },
     };
   } catch (error) {
     return handleError(error) as ErrorResponse;
