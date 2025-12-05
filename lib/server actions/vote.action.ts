@@ -17,10 +17,13 @@ import {
   updateVoteSchema,
 } from "../validation";
 import { UnauthorizedError } from "../http-errors";
-import { Answer, Interaction, Question, Vote } from "@/models";
+import { Answer, Question, Vote } from "@/models";
 import { revalidatePath } from "next/cache";
 import ROUTES from "@/constants/routes";
 import { after } from "next/server";
+import { createInteraction } from "./interaction.action";
+import { IQuestionDoc } from "@/models/question.model";
+import { IAnswerDoc } from "@/models/answer.model";
 
 // only called in try block
 async function updateVoteCount(
@@ -141,14 +144,17 @@ export async function createVote(
 
     after(async () => {
       const model = targetType === "question" ? Question : Answer;
-      const target = await model.findById(targetId);
-      await Interaction.create({
-        action: voteType,
-        actionId: targetId,
-        actionType: targetType,
-        authorId: target.author._id.toString(),
+      const target = await model.findById(targetId) as IQuestionDoc | IAnswerDoc;
+
+        await createInteraction({
+          performerId: userId,
+          action: voteType,
+          actionId: targetId,
+          actionType: targetType,
+          authorId: target.author.toString(),
+        });
       });
-    });
+  
 
     return { success: true } as ActionResponse;
   } catch (error) {

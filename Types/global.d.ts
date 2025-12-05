@@ -169,6 +169,7 @@ interface deleteAnswerParams {
 }
 
 interface createInteractionParams {
+  performerId: string;
   actionId: string;
   authorId: string;
   actionType: "question" | "answer";

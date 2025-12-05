@@ -15,13 +15,14 @@ import {
 } from "../validation";
 import handleError from "../handlers/error";
 import mongoose from "mongoose";
-import { Answer as answerModel, Interaction, Question, Vote } from "@/models";
+import { Answer as answerModel, Question, Vote } from "@/models";
 import { NotFoundError, UnauthorizedError } from "../http-errors";
 import { IAnswerDoc } from "@/models/answer.model";
 import { IQuestionDoc } from "@/models/question.model";
 import { revalidatePath } from "next/cache";
 import ROUTES from "@/constants/routes";
 import { after } from "next/server";
+import { createInteraction } from "./interaction.action";
 
 export async function createAnswer(
   params: createAnswerParams
@@ -48,7 +49,7 @@ export async function createAnswer(
     const question = (await Question.findById(questionId)) as IQuestionDoc;
     if (!question) throw new NotFoundError("Question");
 
-    const [answer] = await answerModel.create(
+    const [answer] = (await answerModel.create(
       [
         {
           question: questionId,
@@ -57,7 +58,7 @@ export async function createAnswer(
         },
       ],
       { session }
-    );
+    )) as IAnswerDoc[];
     if (!answer) throw new Error("Failed to create the answer");
 
     question.answers += 1;
@@ -67,7 +68,8 @@ export async function createAnswer(
     revalidatePath(ROUTES.QUESTION(questionId));
 
     after(async () => {
-      await Interaction.create({
+      await createInteraction({
+        performerId: userId,
         action: "post",
         actionId: answer._id.toString(),
         actionType: "answer",
@@ -187,7 +189,8 @@ export async function deleteAnswer(
     revalidatePath(ROUTES.PROFILE(userId));
 
     after(async () => {
-      await Interaction.create({
+      await createInteraction({
+        performerId: userId,
         action: "delete",
         actionId: answer._id.toString(),
         actionType: "answer",

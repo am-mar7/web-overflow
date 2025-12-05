@@ -15,7 +15,6 @@ import {
   deleteQuestionSchema,
   editQuestionSchema,
   getQuestionSchema,
-  incrementViewsSchema,
   PaginatedSearchParamsSchema,
 } from "../validation";
 import handleError from "../handlers/error";
@@ -30,6 +29,7 @@ import { Answer, Collection, ViewQuestion, Vote } from "@/models";
 import { IAnswerDoc } from "@/models/answer.model";
 import { after } from "next/server";
 import { createInteraction } from "./interaction.action";
+import ROUTES from "@/constants/routes";
 
 export async function createQuestion(
   params: QuestionParams
@@ -93,6 +93,7 @@ export async function createQuestion(
 
     after(async () => {
       await createInteraction({
+        performerId: userId,
         action: "post",
         actionId: question._id.toString(),
         actionType: "question",
@@ -130,6 +131,8 @@ export async function updateQuestion(
   const userId = validatedParams.session?.user?.id;
 
   try {
+    if (!userId) throw new UnauthorizedError();
+
     const question = await questionModel.findById(questionId).populate("tags");
     if (!question) throw new Error("Question not found");
 
@@ -206,6 +209,7 @@ export async function updateQuestion(
 
     after(async () => {
       await createInteraction({
+        performerId: userId,
         action: "edit",
         actionId: question._id.toString(),
         actionType: "question",
@@ -396,6 +400,7 @@ export async function deleteQuestion(
 
     after(async () => {
       await createInteraction({
+        performerId: userId,
         action: "delete",
         actionId: questionId,
         actionType: "question",
@@ -415,13 +420,7 @@ export async function deleteQuestion(
 export async function incrementViews(
   params: incrementViewsParams
 ): Promise<ActionResponse> {
-  const validate = await actionHandler({
-    params,
-    schema: incrementViewsSchema,
-  });
-  if (validate instanceof Error) return handleError(validate) as ErrorResponse;
-
-  const { questionId, viewer } = validate.params!;
+  const { questionId, viewer } = params;
 
   if (!viewer) return handleError(new UnauthorizedError()) as ErrorResponse;
 
@@ -440,10 +439,12 @@ export async function incrementViews(
       $inc: { views: 1 },
     })) as IQuestionDoc;
 
+    revalidatePath(ROUTES.QUESTION(question._id.toString()));
     revalidatePath("/", "layout");
 
     after(async () => {
       await createInteraction({
+        performerId: viewer,
         action: "view",
         actionId: questionId,
         actionType: "question",

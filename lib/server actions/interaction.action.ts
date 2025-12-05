@@ -6,8 +6,6 @@ import {
   ErrorResponse,
   updateReputationParams,
 } from "@/Types/global";
-import actionHandler from "../handlers/action";
-import { createInteractionSchema } from "../validation";
 import handleError from "../handlers/error";
 import { UnauthorizedError } from "../http-errors";
 import { Interaction, User } from "@/models";
@@ -17,15 +15,7 @@ import mongoose from "mongoose";
 export async function createInteraction(
   params: createInteractionParams
 ): Promise<ActionResponse<IInteractionDoc>> {
-  const validate = await actionHandler({
-    params,
-    schema: createInteractionSchema,
-    authorizetionProccess: true,
-  });
-  if (validate instanceof Error) return handleError(validate) as ErrorResponse;
-
-  const performerId = validate.session?.user?.id;
-  const { action, actionId, actionType, authorId } = validate.params!;
+  const { action, actionId, actionType, authorId , performerId } = params;
   if (!performerId)
     return handleError(new UnauthorizedError()) as ErrorResponse;
 
@@ -69,7 +59,8 @@ async function updateReputation(params: updateReputationParams) {
   let performerPoints = 0;
   let authorPoints = 0;
   const { action, actionType } = interaction;
-
+  console.log("PARAMS" , params);
+  
   switch (action) {
     case "view":
       authorPoints = 2;
