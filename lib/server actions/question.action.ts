@@ -28,6 +28,8 @@ import { dbConnect } from "../mongoose";
 import { revalidatePath } from "next/cache";
 import { Answer, Collection, ViewQuestion, Vote } from "@/models";
 import { IAnswerDoc } from "@/models/answer.model";
+import { after } from "next/server";
+import { createInteraction } from "./interaction.action";
 
 export async function createQuestion(
   params: QuestionParams
@@ -46,7 +48,9 @@ export async function createQuestion(
   const { title, content, tags } = validatedParams.params!;
   const userId = validatedParams.session?.user?.id;
   try {
-    const [question] = await questionModel.create(
+    if (!userId) throw new UnauthorizedError();
+
+    const [question]: IQuestionDoc[] = await questionModel.create(
       [
         {
           author: userId,
@@ -86,6 +90,15 @@ export async function createQuestion(
     await session.commitTransaction();
 
     revalidatePath("/", "layout");
+
+    after(async () => {
+      await createInteraction({
+        action: "post",
+        actionId: question._id.toString(),
+        actionType: "question",
+        authorId: userId,
+      });
+    });
 
     return {
       success: true,
@@ -190,6 +203,15 @@ export async function updateQuestion(
     await question.save();
 
     revalidatePath("/", "layout");
+
+    after(async () => {
+      await createInteraction({
+        action: "edit",
+        actionId: question._id.toString(),
+        actionType: "question",
+        authorId: question.author.toString(),
+      });
+    });
 
     return {
       success: true,
@@ -332,7 +354,7 @@ export async function deleteQuestion(
       .session(session)) as IQuestionDoc;
     if (!question) throw new NotFoundError("Question");
 
-    if (question.author.toString() !== userId)
+    if (question.author.toString() !== userId || !userId)
       throw new UnauthorizedError(
         "You are not authorized to delete this question"
       );
@@ -355,6 +377,7 @@ export async function deleteQuestion(
         { $inc: { questions: -1 } },
         { session }
       );
+      await Tag.deleteMany({ questions: { $lte: 0 } }, { session });
     }
 
     if (answers.length) {
@@ -370,6 +393,16 @@ export async function deleteQuestion(
     await session.commitTransaction();
 
     revalidatePath("/", "layout");
+
+    after(async () => {
+      await createInteraction({
+        action: "delete",
+        actionId: questionId,
+        actionType: "question",
+        authorId: userId,
+      });
+    });
+
     return { success: true };
   } catch (error) {
     await session.abortTransaction();
@@ -403,9 +436,21 @@ export async function incrementViews(
     const [view] = await ViewQuestion.create([{ questionId, viewer }]);
     if (!view) throw new Error("Failed to create new view");
 
-    await questionModel.findByIdAndUpdate(questionId, { $inc: { views: 1 } });
+    const question = (await questionModel.findByIdAndUpdate(questionId, {
+      $inc: { views: 1 },
+    })) as IQuestionDoc;
 
     revalidatePath("/", "layout");
+
+    after(async () => {
+      await createInteraction({
+        action: "view",
+        actionId: questionId,
+        actionType: "question",
+        authorId: question.author.toString(),
+      });
+    });
+
     return { success: true };
   } catch (error) {
     return handleError(error) as ErrorResponse;

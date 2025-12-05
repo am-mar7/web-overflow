@@ -36,7 +36,7 @@ export async function createInteraction(
     const [interaction]: IInteractionDoc[] = await Interaction.create(
       [
         {
-          user: performerId,
+          authorId : performerId,
           action,
           actionType,
           actionId,
@@ -44,7 +44,6 @@ export async function createInteraction(
       ],
       { session }
     );
-
     if (!interaction) throw new Error("Failed to create new interaction");
 
     await updateReputation({
@@ -54,6 +53,7 @@ export async function createInteraction(
       session,
     });
 
+    await session.commitTransaction();
     return { success: true, data: JSON.parse(JSON.stringify(interaction)) };
   } catch (error) {
     await session.abortTransaction();
@@ -72,7 +72,6 @@ async function updateReputation(params: updateReputationParams) {
 
   switch (action) {
     case "view":
-      performerPoints = 1;
       authorPoints = 2;
       break;
     case "upvote":

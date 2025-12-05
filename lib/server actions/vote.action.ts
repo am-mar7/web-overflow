@@ -17,9 +17,10 @@ import {
   updateVoteSchema,
 } from "../validation";
 import { UnauthorizedError } from "../http-errors";
-import { Answer, Question, Vote } from "@/models";
+import { Answer, Interaction, Question, Vote } from "@/models";
 import { revalidatePath } from "next/cache";
 import ROUTES from "@/constants/routes";
+import { after } from "next/server";
 
 // only called in try block
 async function updateVoteCount(
@@ -138,6 +139,17 @@ export async function createVote(
     await session.commitTransaction();
     revalidatePath(ROUTES.QUESTION(targetId));
 
+    after(async () => {
+      const model = targetType === "question" ? Question : Answer;
+      const target = await model.findById(targetId);
+      await Interaction.create({
+        action: voteType,
+        actionId: targetId,
+        actionType: targetType,
+        authorId: target.author._id.toString(),
+      });
+    });
+
     return { success: true } as ActionResponse;
   } catch (error) {
     await session.abortTransaction();
@@ -164,7 +176,7 @@ export async function hasVoted(
 
   try {
     if (!userId) throw new UnauthorizedError();
-    
+
     const vote = await Vote.findOne({
       author: userId,
       targetId,

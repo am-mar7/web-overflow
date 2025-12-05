@@ -15,12 +15,13 @@ import {
 } from "../validation";
 import handleError from "../handlers/error";
 import mongoose from "mongoose";
-import { Answer as answerModel, Question, Vote } from "@/models";
+import { Answer as answerModel, Interaction, Question, Vote } from "@/models";
 import { NotFoundError, UnauthorizedError } from "../http-errors";
 import { IAnswerDoc } from "@/models/answer.model";
 import { IQuestionDoc } from "@/models/question.model";
 import { revalidatePath } from "next/cache";
 import ROUTES from "@/constants/routes";
+import { after } from "next/server";
 
 export async function createAnswer(
   params: createAnswerParams
@@ -42,6 +43,8 @@ export async function createAnswer(
   session.startTransaction();
 
   try {
+    if (!userId) throw new UnauthorizedError();
+
     const question = (await Question.findById(questionId)) as IQuestionDoc;
     if (!question) throw new NotFoundError("Question");
 
@@ -62,6 +65,15 @@ export async function createAnswer(
     await session.commitTransaction();
 
     revalidatePath(ROUTES.QUESTION(questionId));
+
+    after(async () => {
+      await Interaction.create({
+        action: "post",
+        actionId: answer._id.toString(),
+        actionType: "answer",
+        authorId: question.author.toString(),
+      });
+    });
 
     return {
       success: true,
@@ -173,6 +185,16 @@ export async function deleteAnswer(
 
     revalidatePath(ROUTES.QUESTION(answer.question._id.toString()));
     revalidatePath(ROUTES.PROFILE(userId));
+
+    after(async () => {
+      await Interaction.create({
+        action: "delete",
+        actionId: answer._id.toString(),
+        actionType: "answer",
+        authorId: userId,
+      });
+    });
+
     return { success: true };
   } catch (error) {
     await session.abortTransaction();
@@ -181,4 +203,3 @@ export async function deleteAnswer(
     await session.endSession();
   }
 }
-
