@@ -71,6 +71,12 @@ interface Collection {
   question: Question;
 }
 
+interface Badges {
+  GOLD: number;
+  SILVER: number;
+  BRONZE: number;
+}
+
 // params
 
 interface SignInWithOauthParams {

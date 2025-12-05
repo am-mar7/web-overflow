@@ -3,6 +3,7 @@
 import {
   ActionResponse,
   Answer,
+  Badges,
   ErrorResponse,
   PaginatedSearchParams,
   Question,
@@ -27,6 +28,7 @@ import {
   User as userModel,
 } from "@/models";
 import { NotFoundError } from "../http-errors";
+import { assignBadges } from "../utils";
 
 export async function getUsers(
   params: PaginatedSearchParams
@@ -186,14 +188,75 @@ export async function getUserTags(
       { $unwind: "$tag" },
       { $sort: { count: -1 } },
       { $limit: 10 },
-      {$project: {
-        _id: "$tag._id",
-        name: "$tag.name",
-        count: 1,
-      }}
+      {
+        $project: {
+          _id: "$tag._id",
+          name: "$tag.name",
+          count: 1,
+        },
+      },
     ];
     const userTags = await questionModel.aggregate(pipeline);
     return { success: true, data: userTags };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getUserStats(userId: string): Promise<
+  ActionResponse<{
+    totalQuestions: number;
+    totalAnswers: number;
+    badges: Badges;
+  }>
+> {
+  try {
+    let [questionStats] = await questionModel.aggregate([
+      { $match: { author: new Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+          upvotes: { $sum: "$upvotes" },
+          views: { $sum: "$views" },
+        },
+      },
+    ]);
+
+    let [answerStats] = await answerModel.aggregate([
+      { $match: { author: new Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+          upvotes: { $sum: "$upvotes" },
+        },
+      },
+    ]);
+
+    questionStats = questionStats || { count: 0, upvotes: 0, views: 0 };
+    answerStats = answerStats || { count: 0, upvotes: 0 };
+
+    const badges = assignBadges({
+      criteria: [
+        { type: "ANSWER_COUNT", count: answerStats.count },
+        { type: "QUESTION_COUNT", count: questionStats.count },
+        {
+          type: "QUESTION_UPVOTES",
+          count: questionStats.upvotes + answerStats.upvotes,
+        },
+        { type: "TOTAL_VIEWS", count: questionStats.views },
+      ],
+    });
+
+    return {
+      success: true,
+      data: {
+        totalQuestions: questionStats.count,
+        totalAnswers: answerStats.count,
+        badges,
+      },
+    };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }

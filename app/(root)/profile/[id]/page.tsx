@@ -4,6 +4,7 @@ import {
   getUser,
   getUserAnswers,
   getUserQuestions,
+  getUserStats,
   getUserTags,
 } from "@/lib/server actions/user.action";
 import { RouteParams } from "@/Types/global";
@@ -29,18 +30,21 @@ export default async function Profile({ params, searchParams }: RouteParams) {
     },
     { success: userAnswersSuccess, data: answersData, error: answersError },
     { success: userTagsSuccess, data: tagsData, error: tagsError },
+    { data: statsData },
   ] = await Promise.all([
     getUser(id),
     getUserQuestions({ userId: id, page: Number(page) || 1, pageSize: 5 }),
     getUserAnswers({ userId: id, page: Number(page) || 1, pageSize: 5 }),
     getUserTags({ userId: id }),
+    getUserStats(id),
   ]);
 
   if (!success || !user || !id) return notFound();
 
-  const { name, email, bio, createdAt, portfolio } = user || {};
+  const { name, email, bio, createdAt, portfolio, reputation } = user || {};
   const { questions, isNext: hasMoreQuestions } = questionsData || {};
   const { answers, isNext: hasMoreAnswers } = answersData || {};
+  const { totalQuestions, totalAnswers, badges } = statsData || {};
 
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
@@ -54,6 +58,12 @@ export default async function Profile({ params, searchParams }: RouteParams) {
             <p className="font-space-grotesk h3-semibold">{email}</p>
           </div>
         </div>
+        <p className="flex-center gap-2">
+          <span className="text-light-500 font-space-grotesk">
+            reputation:
+          </span>
+          <span>{reputation}</span>
+        </p>
       </section>
 
       <section>
@@ -80,27 +90,27 @@ export default async function Profile({ params, searchParams }: RouteParams) {
           <div className="px-5 py-2.5 flex flex-col justify-evenly rounded-lg bg-light800_dark200 flex-1">
             <p className="flex-between">
               <span>answers</span>
-              <span>count</span>
+              <span>{totalAnswers || 0}</span>
             </p>
             <p className="flex-between">
               <span>questions</span>
-              <span>count</span>
+              <span>{totalQuestions || 0}</span>
             </p>
           </div>
           <StatsCard
             image="/icons/gold-medal.svg"
             title="glod badges"
-            value="count"
+            value={badges?.GOLD || 0}
           />
           <StatsCard
             image="/icons/silver-medal.svg"
             title="silver badges"
-            value="count"
+            value={badges?.SILVER || 0}
           />
           <StatsCard
             image="/icons/bronze-medal.svg"
             title="bronze badges"
-            value="count"
+            value={badges?.BRONZE || 0}
           />
         </div>
       </section>
