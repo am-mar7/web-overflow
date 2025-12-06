@@ -9,7 +9,7 @@ export default function HomePageLoading() {
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex gap-5 flex-col-reverse sm:flex-row justify-between">
         <h1 className="h1-bold text-dark200_light800"> All Questions</h1>
-        <Skeleton className="h-[42px] w-[180px]" />
+        <Skeleton className="h-[42px] sm:w-[180px]" />
       </section>
 
       <section className="mt-6">
@@ -22,7 +22,7 @@ export default function HomePageLoading() {
         {Array.from({ length: 10 }).map((_, idx) => (
           <div
             key={idx}
-            className="p-6 rounded-lg bg-light800_dark200 space-y-4"
+            className="p-6 rounded-lg bg-light700_dark200 space-y-4"
           >
             {/* Question Title */}
             <Skeleton className="h-6 w-3/4" />

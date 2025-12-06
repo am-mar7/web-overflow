@@ -20,7 +20,7 @@ export default function TagsLoading() {
         />
       </section>
 
-      <div className="py-4 grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-2">
+      <div className="py-4 grid sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-2">
         {Array.from({ length: 10 }).map((_, idx) => (
           <div key={idx} className="flex flex-col gap-3 bg-light700_dark200 p-4 rounded-lg">
             <div className="flex-between">

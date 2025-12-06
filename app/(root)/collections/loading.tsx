@@ -23,7 +23,7 @@ export default function CollectionLoading() {
 
       <div className="mt-5 w-full flex flex-col gap-6">
         {Array.from({ length: 10 }).map((_, idx) => (
-          <div key={idx} className="p-6 rounded-lg bg-light800_dark200 space-y-4">
+          <div key={idx} className="p-6 rounded-lg bg-light700_dark200 space-y-4">
             {/* Question Title */}
             <Skeleton className="h-6 w-3/4" />
 
