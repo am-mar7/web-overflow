@@ -27,7 +27,7 @@ export default async function Tag({ params, searchParams }: RouteParams) {
       <h1 className="h1-semibold text-dark200_light800">{tag?.name}</h1>
       <section className="mt-6 flex-center flex-col sm:flex-row gap-2.5">
         <div className="w-full">
-          <LocalSearch route={ROUTES.TAG(id)} placeholder="search for tag..." />
+          <LocalSearch route={ROUTES.TAG(id)} placeholder="search for Question..." />
         </div>
         <CommentFilters
           filters={HomePageFilters}
