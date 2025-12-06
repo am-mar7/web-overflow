@@ -7,6 +7,59 @@ import { CollectionFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
 import { getCollections } from "@/lib/server actions/collection.action";
 import { RouteParams } from "@/Types/global";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DOF | Saved Questions",
+  description: "View and manage your saved questions. Access your bookmarked programming questions and answers for quick reference and future learning.",
+  
+  keywords: [
+    "saved questions",
+    "bookmarked questions",
+    "question collection",
+    "saved answers",
+    "programming bookmarks",
+    "developer resources",
+    "code snippets",
+    "learning resources"
+  ],
+
+  // Open Graph for social media sharing
+  openGraph: {
+    title: "My Collections | Saved Questions",
+    description: "View and manage your saved programming questions and answers.",
+    type: "website",
+    // url: "https://yourdomain.com/collections", // Add your domain
+    // images: [
+    //   {
+    //     url: "https://yourdomain.com/og-collections.png", // Add your OG image
+    //     width: 1200,
+    //     height: 630,
+    //     alt: "Collections - Your App Name",
+    //   },
+    // ],
+  },
+
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "My Collections | Saved Questions",
+    description: "View and manage your saved programming questions and answers.",
+    // images: ["https://yourdomain.com/og-collections.png"],
+    // creator: "@yourtwitterhandle",
+  },
+
+  // Additional metadata
+  robots: {
+    index: false, // Collections are personal, don't index
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
+
+};
 
 export default async function Collection({ searchParams }: RouteParams) {
   const { page, pageSize, query, filter } = await searchParams;

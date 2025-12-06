@@ -21,6 +21,100 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const { success, data: question } = await getQuestion(id);
+
+  if (!success || !question) {
+    return {
+      title: "Question Not Found",
+      description: "The requested question could not be found.",
+    };
+  }
+
+  const { title, content, author, tags, views, answers , createdAt } = question;
+
+  const plainTextContent = content
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/\s+/g, ' ')     // Normalize whitespace
+    .trim()
+    .slice(0, 155);           // Limit to 155 characters for meta description
+
+  const tagNames = tags.map((tag: { name: string }) => tag.name);
+
+  return {
+    title: `${title} - Programming Question`,
+    description: `${plainTextContent}... Asked by ${author.name}. ${answers} answers, ${views} views.`,
+    
+    keywords: [
+      ...tagNames,
+      "programming question",
+      "coding help",
+      "developer question",
+      "code solution",
+      "programming answer",
+      author.name,
+    ],
+
+    // Open Graph - Great for sharing on social media
+    openGraph: {
+      title: title,
+      description: plainTextContent,
+      type: "article",
+      // url: `https://yourdomain.com/questions/${id}`,
+      images: author.image ? [
+        {
+          url: author.image,
+          width: 400,
+          height: 400,
+          alt: `${author.name}'s profile picture`,
+        },
+      ] : [],
+      // Article-specific metadata
+      publishedTime: getTimeStamp(createdAt),
+      authors: [author.name],
+      tags: tagNames,
+    },
+
+    // Twitter Card
+    twitter: {
+      card: "summary_large_image",
+      title: title,
+      description: plainTextContent,
+      images: author.image ? [author.image] : [],
+      // creator: "@yourtwitterhandle",
+    },
+
+    // Additional metadata for rich results
+    other: {
+      "article:author": author.name,
+      "article:published_time": getTimeStamp(createdAt),
+      "article:tag": tagNames.join(", "),
+    },
+
+    // Robots - Questions should definitely be indexed!
+    robots: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,      // Allow unlimited snippet length
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-snippet": -1,
+        "max-image-preview": "large",
+      },
+    },
+  };
+}
 
 export default async function QuestionDetails({
   params,

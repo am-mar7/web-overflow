@@ -7,6 +7,64 @@ import { TagFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
 import { getTags } from "@/lib/server actions/tag.action";
 import { RouteParams } from "@/Types/global";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dev Overflow | Tags",
+  description: "Explore all programming topics and technologies. Browse tags to find questions about specific programming languages, frameworks, tools, and concepts.",
+  
+  keywords: [
+    "programming tags",
+    "coding topics",
+    "technology tags",
+    "programming languages",
+    "frameworks",
+    "developer tools",
+    "tech topics",
+    "code categories",
+    "browse topics",
+    "filter questions",
+    "programming categories"
+  ],
+
+  // Open Graph for social media sharing
+  openGraph: {
+    title: "Tags | Browse Programming Topics",
+    description: "Explore all programming topics and technologies. Find questions by specific languages, frameworks, and tools.",
+    type: "website",
+    // url: "https://yourdomain.com/tags", // Add your domain
+    // images: [
+    //   {
+    //     url: "https://yourdomain.com/og-tags.png", // Add your OG image
+    //     width: 1200,
+    //     height: 630,
+    //     alt: "Tags - Browse Topics",
+    //   },
+    // ],
+  },
+
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "Tags | Browse Programming Topics",
+    description: "Explore all programming topics and technologies. Find questions by specific languages and frameworks.",
+    // images: ["https://yourdomain.com/og-tags.png"],
+    // creator: "@yourtwitterhandle",
+  },
+
+  // Additional metadata
+  robots: {
+    index: true, // Tags should be indexed for topic discovery
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+};
 
 export default async function Tags({ searchParams }: RouteParams) {
   const { page, pageSize, query, filter } = await searchParams;

@@ -1,4 +1,9 @@
 import AuthForm from "@/components/forms/AuthForm";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dev Overflow| Signup"
+}
 
 export default function SignUp() {
   return (

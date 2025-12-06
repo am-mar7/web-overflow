@@ -18,6 +18,92 @@ import QuestionCard from "@/components/cards/QuestionCard";
 import AnswerCard from "@/components/cards/AnswerCard";
 import Pagination from "@/components/Pagination";
 import TagCard from "@/components/cards/TagCard";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const { success, data: user } = await getUser(id);
+
+  if (!success || !user) {
+    return {
+      title: "User Not Found",
+      description: "The requested user profile could not be found.",
+    };
+  }
+
+  const { name , bio, reputation, image } = user;
+
+  return {
+    title: `${name} | Dev Profile`,
+    description: bio
+      ? `${bio.slice(0, 155)}...`
+      : `View ${name}'s profile, questions, answers, and contributions to the developer community. Reputation: ${
+          reputation || 0
+        }`,
+
+    keywords: [
+      name,
+      "developer profile",
+      "programmer",
+      "coding questions",
+      "programming answers",
+      "developer reputation",
+      "tech profile",
+    ],
+
+    // Open Graph
+    openGraph: {
+      title: `${name} | Developer Profile`,
+      description: bio
+        ? bio.slice(0, 200)
+        : `View ${name}'s profile and contributions. Reputation: ${
+            reputation || 0
+          }`,
+      type: "profile",
+      // url: `https://yourdomain.com/profile/${id}`,
+      images: image
+        ? [
+            {
+              url: image,
+              width: 400,
+              height: 400,
+              alt: `${name}'s profile picture`,
+            },
+          ]
+        : [],
+      // Profile-specific OG tags
+      // firstName: name.split(' ')[0],
+      // lastName: name.split(' ')[1] || '',
+      // username: name,
+    },
+
+    // Twitter Card
+    twitter: {
+      card: "summary",
+      title: `${name} | Developer Profile`,
+      description: bio
+        ? bio.slice(0, 200)
+        : `View ${name}'s profile. Reputation: ${reputation || 0}`,
+      images: image ? [image] : [],
+      // creator: "@yourtwitterhandle",
+    },
+
+    // Robots
+    robots: {
+      index: true, // Profiles should be indexed
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+      },
+    },
+  };
+}
 
 export default async function Profile({ params, searchParams }: RouteParams) {
   const [{ id }, { page }] = await Promise.all([params, searchParams]);
@@ -59,9 +145,7 @@ export default async function Profile({ params, searchParams }: RouteParams) {
           </div>
         </div>
         <p className="flex-center gap-2">
-          <span className="text-light-500 font-space-grotesk">
-            reputation:
-          </span>
+          <span className="text-light-500 font-space-grotesk">reputation:</span>
           <span>{reputation}</span>
         </p>
       </section>

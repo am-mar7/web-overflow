@@ -7,6 +7,61 @@ import { UserFilters } from "@/constants";
 import ROUTES from "@/constants/routes";
 import { getUsers } from "@/lib/server actions/user.action";
 import { RouteParams } from "@/Types/global";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DOF | Community",
+  description: "Explore our community of developers and programmers. Connect with experts, find mentors, and collaborate with fellow developers from around the world.",
+  
+  keywords: [
+    "developer community",
+    "programmers",
+    "coding community",
+    "find developers",
+    "tech community",
+    "software engineers",
+    "developer network",
+    "programming experts",
+    "code mentors",
+    "tech professionals"
+  ],
+
+  // Open Graph for social media sharing
+  openGraph: {
+    title: "Community | Discover Developers",
+    description: "Explore our community of developers and programmers. Connect with experts and collaborate with fellow developers.",
+    type: "website",
+    // url: "https://yourdomain.com/community", // Add your domain
+    // images: [
+    //   {
+    //     url: "https://yourdomain.com/og-community.png", // Add your OG image
+    //     width: 1200,
+    //     height: 630,
+    //     alt: "Community - Your App Name",
+    //   },
+    // ],
+  },
+
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "Community | Discover Developers",
+    description: "Explore our community of developers and programmers. Connect with experts worldwide.",
+    // images: ["https://yourdomain.com/og-community.png"],
+    // creator: "@yourtwitterhandle",
+  },
+
+  // Additional metadata
+  robots: {
+    index: true, // Community pages should be indexed
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+};
+
 
 export default async function Community({ searchParams }: RouteParams) {
   const { query, filter, page } = await searchParams;
