@@ -30,6 +30,7 @@ import { IAnswerDoc } from "@/models/answer.model";
 import { after } from "next/server";
 import { createInteraction } from "./interaction.action";
 import ROUTES from "@/constants/routes";
+import { cache } from "react";
 
 export async function createQuestion(
   params: QuestionParams
@@ -229,7 +230,7 @@ export async function updateQuestion(
   }
 }
 
-export async function getQuestion(
+export const getQuestion = cache(async function getQuestion(
   questionId: string
 ): Promise<ActionResponse<Question | null>> {
   const validated = await actionHandler({
@@ -254,7 +255,7 @@ export async function getQuestion(
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
-}
+});
 
 export async function getQuestions(params: PaginatedSearchParams): Promise<
   ActionResponse<{
