@@ -15,7 +15,7 @@ export default function RootLayout({
         <div className="sm:w-[110px] xl:w-[266px]">
           <Leftbar />
         </div>
-        <section className="flex flex-1 px-4 min-h-screen ">
+        <section className="flex flex-1 min-h-screen ">
           <div className="mx-auto max-w-7xl w-full">{children}</div>
         </section>
         <div className="lg:w-[260px] xl:w-[340px]">

@@ -195,3 +195,14 @@ interface incrementViewsParams {
   questionId: string;
   viewer: string;
 }
+
+interface globalSearchParams {
+  type?: string | null;
+  query: string;
+}
+
+interface GlobalSearchedItem {
+  id: string;
+  type: "question" | "answer" | "user" | "tag";
+  title: string;
+}

@@ -217,3 +217,8 @@ export const incrementViewsSchema = z.object({
   questionId: z.string().min(1, "question Id is required"),
   viewer: z.string().min(1, "viewer Id is required"),
 });
+
+export const globalSearchSchema = z.object({
+  query: z.string().min(1 , "query is required"),
+  type: z.string().nullable().optional(),
+});
