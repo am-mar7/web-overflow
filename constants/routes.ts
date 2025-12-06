@@ -4,7 +4,6 @@ const ROUTES = {
     SIGN_UP : "/sign-up",
     COMMUNITY : "/community",
     COLLECTIONS : "/collections",
-    JOBS : "/jobs",
     TAGS : "/tags",
     PROFILE : (id:string|null) => `/profile/${id}`,
     ASK_QUESTION : "/ask-question",

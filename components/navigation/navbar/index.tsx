@@ -26,7 +26,11 @@ export default async function Navbar() {
       <div>global search</div>
       <div className="flex-between gap-2 sm:gap-4">
         <ModeToggler />
-        {user && <UserAvatar user={user}/>}
+        {user?.id && (
+          <Link href={ROUTES.PROFILE(user.id)}>
+            <UserAvatar user={user} />
+          </Link>
+        )}
         <MobileNavigation />
       </div>
     </nav>

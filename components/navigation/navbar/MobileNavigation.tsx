@@ -7,9 +7,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import ROUTES from "@/constants/routes";
 import Image from "next/image";
-import Link from "next/link";
 import SigninBtn from "../buttons/SigninBtn";
 import SignupBtn from "../buttons/SignupBtn";
 import NavLinks from "./NavLinks";
@@ -39,13 +37,9 @@ export default async function MobileNavigation() {
       >
         <SheetTitle className="hidden">Navigation</SheetTitle>
         <div>
-          <Link
-            href={ROUTES.HOME}
-            prefetch={false}
-            className="flex-start gap-1.5"
-          >
+          <div className="flex-start gap-1.5">
             <Image
-              src="images/site-logo.svg"
+              src="/images/site-logo.svg"
               width={30}
               height={30}
               alt="devoverflow logo"
@@ -53,14 +47,14 @@ export default async function MobileNavigation() {
             <p className="font-space-grotesk h2-bold">
               Dev <span className="text-primary-500">Overflow</span>
             </p>
-          </Link>
+          </div>
           <div className="space-y-4 mt-12">
-            <NavLinks isMobile userId={session?.user?.id}/>
+            <NavLinks isMobile userId={session?.user?.id} />
           </div>
         </div>
         <SheetFooter>
           {isAuthentecated ? (
-            <LogoutBtn isMobile/>
+            <LogoutBtn isMobile />
           ) : (
             <>
               <SheetClose asChild>
