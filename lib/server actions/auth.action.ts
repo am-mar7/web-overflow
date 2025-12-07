@@ -1,7 +1,7 @@
 "use server";
 
 import mongoose from "mongoose";
-import { ActionResponse, AuthCredentials } from "@/Types/global";
+import { AuthCredentials } from "@/Types/global";
 import actionHandler from "../handlers/action";
 import handleError from "../handlers/error";
 import { SignInSchema, SignUpSchema } from "../validation";
@@ -66,14 +66,14 @@ export async function credentialsSignIn(params: AuthCredentials) {
 
   const { email, password } = validated.params!;
   try {
-    const user = (await User.findOne({ email })) as ActionResponse<IUserDoc>;
+    const user = (await User.findOne({ email })) as IUserDoc;
     if (!user) throw new NotFoundError("User");
 
     const account = (await Account.findOne({
       userId: user._id,
       provider: "credentials",
       providerAccountId: email,
-    })) as ActionResponse<IAccountDoc>;
+    })) as IAccountDoc;
     if (!account) throw new NotFoundError("Account");
 
     const isValidPassword = await bcrypt.compare(password, account.password!);
