@@ -1,8 +1,6 @@
-import { auth } from "@/auth";
 import QuestionForm from "@/components/forms/QuestionForm";
-import ROUTES from "@/constants/routes";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
+
 
 export const metadata: Metadata = {
   title: "DOF | Ask a Question",
@@ -54,10 +52,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function AskQuestion() {
-  const session = await auth();
-  if(!session?.user)
-    return redirect(ROUTES.SIGN_IN);
+export default function AskQuestion() {
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="text-dark200_light800 h1-bold">

@@ -1,10 +1,12 @@
 "use client";
 
+import ROUTES from "@/constants/routes";
 import { toggleSaveQuestion } from "@/lib/server actions/collection.action";
 import { ActionResponse } from "@/Types/global";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { use , useTransition } from "react";
+import Link from "next/link";
+import { use, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -23,7 +25,15 @@ export default function CollectionBtn({ hasSavedPromise, questionId }: Props) {
 
   const handleToggle = async () => {
     if (isPending) return;
-    if (!userId) return toast.error("You must be loggend go login first");
+    if (!userId)
+      return toast.error(
+        <div>
+          <p>You must be logged in to continue</p>
+          <Link href={ROUTES.SIGN_IN} className="underline font-semibold">
+            Sign in now
+          </Link>
+        </div>
+      );
 
     startTransition(async () => {
       const { success, error } = await toggleSaveQuestion(questionId);

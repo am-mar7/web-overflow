@@ -25,6 +25,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ROUTES from "@/constants/routes";
 import { Question } from "@/Types/global";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 const Editor = dynamic(() => import("../editor/index"), {
   ssr: false,
@@ -35,6 +37,7 @@ interface Props {
 }
 export default function QuestionForm({ question, isEdit = false }: Props) {
   const [isPending, startTransition] = useTransition();
+  const session = useSession();
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(createQuestionSchema),
@@ -46,6 +49,16 @@ export default function QuestionForm({ question, isEdit = false }: Props) {
   });
   const editorRef = useRef<MDXEditorMethods | null>(null);
   async function handleCreateQuestion() {
+    if (!session.data?.user?.id) 
+      return toast.error(
+        <div>
+          <p>You must be logged in to post question</p>
+          <Link href={ROUTES.SIGN_IN} className="underline font-semibold">
+            Sign in now
+          </Link>
+        </div>
+      );
+    
     startTransition(async () => {
       if (isEdit && question) {
         const { success, error, data } = await updateQuestion({

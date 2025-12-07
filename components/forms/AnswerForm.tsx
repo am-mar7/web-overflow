@@ -18,6 +18,9 @@ import Image from "next/image";
 import { createAnswer } from "@/lib/server actions/answer.action";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import ROUTES from "@/constants/routes";
 
 const Editor = dynamic(() => import("../editor/index"), {
   ssr: false,
@@ -41,8 +44,17 @@ export default function AnswerForm({
   });
 
   const editorRef = useRef<MDXEditorMethods | null>(null);
-
+  const session = useSession();
   const handleSubmit = async () => {
+    if (!session.data?.user?.id)
+      return toast.error(
+        <div>
+          <p>You must be logged in to post answer</p>
+          <Link href={ROUTES.SIGN_IN} className="underline font-semibold">
+            Sign in now
+          </Link>
+        </div>
+      );
     setIsSubmitting(true);
     const { success, error } = await createAnswer({
       questionId,
@@ -50,7 +62,7 @@ export default function AnswerForm({
     });
 
     if (success) {
-      editorRef.current?.setMarkdown("");      
+      editorRef.current?.setMarkdown("");
       toast.success("answer posted successfully", { duration: 3000 });
     } else {
       console.log(error);
@@ -65,15 +77,17 @@ export default function AnswerForm({
 
   const generateAnswer = async () => {
     setIsAiSubmitting(true);
-    const baseAnswer = editorRef.current?.getMarkdown() || ""
-    if(baseAnswer.length < 50){
-      toast.error("your answer must exceed 50 chars before you ask ai for help !");
+    const baseAnswer = editorRef.current?.getMarkdown() || "";
+    if (baseAnswer.length < 50) {
+      toast.error(
+        "your answer must exceed 50 chars before you ask ai for help !"
+      );
       return;
     }
     const { success, data, error } = await api.ai.getOPtimizedAnswer(
       questionTitle,
       questionContent,
-      baseAnswer 
+      baseAnswer
     );
     setIsAiSubmitting(false);
     if (!success) {
