@@ -19,15 +19,18 @@ import { deleteAnswer } from "@/lib/server actions/answer.action";
 import { toast } from "sonner";
 import { useTransition } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface Props {
   type: "question" | "answer";
   id: string;
   authorId: string;
+  navigate?: boolean;
 }
-export default function ActionsButton({ type, id, authorId }: Props) {
+export default function ActionsButton({ type, id, authorId , navigate=false }: Props) {
   const session = useSession();
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   if (session.data?.user?.id !== authorId) return;
 
   const handleDelete = async () => {
@@ -36,6 +39,10 @@ export default function ActionsButton({ type, id, authorId }: Props) {
       const params = { questionId: id, answerId: id };
       const { success, error } = await deleteFn(params);
       if (!success) toast.error(error?.message || `Failed to delete ${type}`);
+      if(success && navigate) {
+        router.push(ROUTES.HOME);
+        toast.success(`${type} deleted successfully`);
+      }
     });
   };
   if (type === "question")

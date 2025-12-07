@@ -202,7 +202,7 @@ export default async function QuestionDetails({
               hasSavedPromise={hasSavedPromise}
             />
             {userId === question.author._id && (
-              <ActionsButton type="question" authorId={userId} id={id} />
+              <ActionsButton navigate type="question" authorId={userId} id={id} />
             )}
           </div>
         </section>
