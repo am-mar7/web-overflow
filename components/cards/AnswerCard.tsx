@@ -10,6 +10,7 @@ import ActionsButton from "../user/ActionsButton";
 
 interface Props extends Answer {
   readMore?: boolean;
+  showActionButtons: boolean;
 }
 
 export default function AnswerCard({
@@ -21,6 +22,7 @@ export default function AnswerCard({
   upvotes,
   question,
   downvotes,
+  showActionButtons,
 }: Props) {
   const date = getTimeStamp(createdAt);
 
@@ -28,7 +30,6 @@ export default function AnswerCard({
     targetId: _id,
     targetType: "answer",
   });
-
   return (
     <article className="bg-light700_dark300 shadow-md dark:shadow-none px-5 py-2.5 rounded-lg">
       <span id={`answer-${_id}`}></span>
@@ -50,7 +51,7 @@ export default function AnswerCard({
         </div>
         <div>
           <div className="w-full flex justify-end py-3">
-            <ActionsButton type="answer" id={_id} authorId={author._id} />
+            {showActionButtons && <ActionsButton type="answer" id={_id} />}
           </div>
           <Vote
             upvotes={upvotes}

@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import DataRenderer from "./DataRenderer";
 import Pagination from "./Pagination";
 import AnswerCard from "./cards/AnswerCard";
@@ -15,12 +16,17 @@ export default async function AllAnswers({
   questionId,
   filter,
 }: Props) {
-  const { data, success, error } = await getAnswers({
-    questionId,
-    filter,
-    pageSize: 3,
-    page: Number(page) || 1,
-  });
+  const [{ data, success, error }, session] = await Promise.all([
+    getAnswers({
+      questionId,
+      filter,
+      pageSize: 3,
+      page: Number(page) || 1,
+    }),
+    auth(),
+  ]);
+
+  const userId = session?.user?.id;
   const { totalAnswers, answers, isNext } = data || {};
   return (
     <div>
@@ -43,7 +49,13 @@ export default async function AllAnswers({
             message: "be first one to help this developr",
           }}
           render={(data) =>
-            data?.map((answer) => <AnswerCard {...answer} key={answer._id} />)
+            data?.map((answer) => (
+              <AnswerCard
+                showActionButtons={userId === answer.author._id}
+                {...answer}
+                key={answer._id}
+              />
+            ))
           }
         />
 

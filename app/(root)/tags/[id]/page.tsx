@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
 import CommentFilters from "@/components/filters/CommentFilters";
@@ -103,9 +104,10 @@ export async function generateMetadata({
 }
 
 export default async function Tag({ params, searchParams }: RouteParams) {
-  const [{ id }, { page, query, filter }] = await Promise.all([
+  const [{ id }, { page, query, filter }, session] = await Promise.all([
     params,
     searchParams,
+    auth(),
   ]);
 
   const { data, success, error } = await getTagQuestions({
@@ -116,6 +118,7 @@ export default async function Tag({ params, searchParams }: RouteParams) {
     tagId: id,
   });
   const { isNext, tag, questions } = data || {};
+  const userId = session?.user?.id;
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <h1 className="h1-semibold text-dark200_light800">{tag?.name}</h1>
@@ -149,7 +152,13 @@ export default async function Tag({ params, searchParams }: RouteParams) {
           render={(questions) => (
             <section className="mt-5 w-full flex flex-col gap-6">
               {questions?.map((question) => {
-                return <QuestionCard key={question._id} question={question} />;
+                return (
+                  <QuestionCard
+                    showActionButtons={userId === question.author._id}
+                    key={question._id}
+                    question={question}
+                  />
+                );
               })}
             </section>
           )}

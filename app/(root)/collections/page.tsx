@@ -159,7 +159,7 @@ export default async function Collection({ searchParams }: RouteParams) {
         render={(questions) => (
           <section className="mt-5 w-full flex flex-col gap-6">
             {questions?.map((item) => {
-              return <QuestionCard key={item._id} question={item.question} />;
+              return <QuestionCard showActionButtons key={item._id} question={item.question} />;
             })}
           </section>
         )}

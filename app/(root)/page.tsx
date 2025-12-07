@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
 import CommentFilters from "@/components/filters/CommentFilters";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import ROUTES from "@/constants/routes";
 import { getQuestions } from "@/lib/server actions/question.action";
 import { RouteParams } from "@/Types/global";
+import { Sparkles } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -18,9 +20,10 @@ export const metadata: Metadata = {
   //   default: "Your App Name - Q&A Platform for Developers",
   //   template: "%s | Your App Name" // For child pages
   // },
-  
-  description: "Join our community of developers to ask questions, share knowledge, and learn from experienced programmers. Get answers to your coding problems and help others grow.",
-  
+
+  description:
+    "Join our community of developers to ask questions, share knowledge, and learn from experienced programmers. Get answers to your coding problems and help others grow.",
+
   keywords: [
     "programming questions",
     "coding help",
@@ -33,18 +36,19 @@ export const metadata: Metadata = {
     "software development",
     "learn programming",
     "code solutions",
-    "programming tutorials"
+    "programming tutorials",
   ],
 
   // Application metadata
   applicationName: "Your App Name",
   authors: [{ name: "Your Name" }],
   generator: "Next.js",
-  
+
   // Open Graph for social media sharing
   openGraph: {
     title: "Your Q&A Platform for Developers",
-    description: "Ask questions, share knowledge, and learn from experienced developers worldwide.",
+    description:
+      "Ask questions, share knowledge, and learn from experienced developers worldwide.",
     type: "website",
     locale: "en_US",
     siteName: "Your App Name",
@@ -64,7 +68,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Your Q&A Platform for Developers",
-    description: "Ask questions, share knowledge, and learn from experienced developers worldwide.",
+    description:
+      "Ask questions, share knowledge, and learn from experienced developers worldwide.",
     // site: "@yourtwitterhandle", // Your site's Twitter handle
     // creator: "@yourtwitterhandle", // Your Twitter handle
     // images: ["https://yourdomain.com/og-home.png"],
@@ -91,12 +96,15 @@ export const metadata: Metadata = {
     },
   },
 
- // Category
+  // Category
   category: "technology",
 };
 
 export default async function Home({ searchParams }: RouteParams) {
-  const { page, pageSize, query, filter } = await searchParams;
+  const [{ page, pageSize, query, filter }, session] = await Promise.all([
+    searchParams,
+    auth(),
+  ]);
   const { success, data, error } = await getQuestions({
     page: Number(page) || 1,
     pageSize: Number(pageSize) || 10,
@@ -104,7 +112,8 @@ export default async function Home({ searchParams }: RouteParams) {
     filter,
   });
 
-  const { questions , isNext } = data || {};
+  const userId = session?.user?.id;
+  const { questions, isNext } = data || {};
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex gap-5 flex-col-reverse sm:flex-row justify-between">
@@ -125,26 +134,65 @@ export default async function Home({ searchParams }: RouteParams) {
 
       <HomeFilters />
       <CommentFilters filters={HomePageFilters} otherClasses="sm:hidden mt-5" />
-      <DataRenderer
-        success={success}
-        error={error}
-        empty={{
-          title: "No questions found",
-          message: "The question board is empty. Maybe it’s waiting for your brilliant question to get things rolling",
-          button: {
-            text: "ask question",
-            href: ROUTES.ASK_QUESTION,
-          },
-        }}
-        data={questions}
-        render={(questions) => (
-          <section className="mt-5 w-full flex flex-col gap-6">
-            {questions?.map((question) => {
-              return <QuestionCard key={question._id} question={question} />;
-            })}
-          </section>
-        )}
-      />
+      {filter === "recommended" && !session?.user?.id ? (
+        <div className="mt-16 sm:mt-32 flex-center flex-col gap-4 px-4">
+          <div className="text-center space-y-4 max-w-md">
+            <Sparkles
+              className="mx-auto h-16 w-16 text-dark300_light700"
+              strokeWidth={1.5}
+            />
+            <h2 className="h2-bold text-dark200_light800">
+              Sign In for Personalized Recommendations
+            </h2>
+            <p className="body-regular text-dark400_light500">
+              To get personalized question recommendations based on your
+              interests and activity, you need to be signed in.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href={ROUTES.SIGN_IN}
+                className="primary-gradient min-h-[46px] px-6 py-3 rounded-lg text-dark200_light800 font-semibold transition-all hover:opacity-90"
+              >
+                Sign In
+              </Link>
+              <Link
+                href={ROUTES.SIGN_UP}
+                className="btn-secondary min-h-[46px] px-6 py-3 rounded-lg font-semibold transition-all"
+              >
+                Create Account
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <DataRenderer
+          success={success}
+          error={error}
+          empty={{
+            title: "No questions found",
+            message:
+              "The question board is empty. Maybe it’s waiting for your brilliant question to get things rolling",
+            button: {
+              text: "ask question",
+              href: ROUTES.ASK_QUESTION,
+            },
+          }}
+          data={questions}
+          render={(questions) => (
+            <section className="mt-5 w-full flex flex-col gap-6">
+              {questions?.map((question) => {
+                return (
+                  <QuestionCard
+                    showActionButtons={question.author._id === userId}
+                    key={question._id}
+                    question={question}
+                  />
+                );
+              })}
+            </section>
+          )}
+        />
+      )}
 
       <Pagination isNext={isNext || false} page={page} />
     </div>

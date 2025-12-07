@@ -13,7 +13,6 @@ import {
 
 import Link from "next/link";
 import ROUTES from "@/constants/routes";
-import { useSession } from "next-auth/react";
 import { deleteQuestion } from "@/lib/server actions/question.action";
 import { deleteAnswer } from "@/lib/server actions/answer.action";
 import { toast } from "sonner";
@@ -24,14 +23,11 @@ import { useRouter } from "next/navigation";
 interface Props {
   type: "question" | "answer";
   id: string;
-  authorId: string;
   navigate?: boolean;
 }
-export default function ActionsButton({ type, id, authorId , navigate=false }: Props) {
-  const session = useSession();
+export default function ActionsButton({ type, id , navigate=false }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  if (session.data?.user?.id !== authorId) return;
 
   const handleDelete = async () => {
     startTransition(async () => {

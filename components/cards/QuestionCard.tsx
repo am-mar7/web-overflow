@@ -11,8 +11,10 @@ import ActionsButton from "../user/ActionsButton";
 
 export default function QuestionCard({
   question,
+  showActionButtons,
 }: {
-  question: Omit<Question, "content">;
+  question: Omit<Question, "content">,
+  showActionButtons: boolean,
 }) {
   const { _id, upvotes, views, answers, createdAt, title, author, tags } =
     question;
@@ -31,7 +33,12 @@ export default function QuestionCard({
           {getTimeStamp(createdAt)}
         </span>
         <div className="flex-center gap-2">
-          <ActionsButton type="question" id={question._id} authorId={question.author._id} />
+          {showActionButtons && (
+            <ActionsButton
+              type="question"
+              id={question._id}
+            />
+          )}
           <CollectionBtn
             questionId={question._id}
             hasSavedPromise={hasSavedPromise}

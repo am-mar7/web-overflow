@@ -19,6 +19,7 @@ import AnswerCard from "@/components/cards/AnswerCard";
 import Pagination from "@/components/Pagination";
 import TagCard from "@/components/cards/TagCard";
 import { Metadata } from "next";
+import { auth } from "@/auth";
 
 export async function generateMetadata({
   params,
@@ -36,7 +37,7 @@ export async function generateMetadata({
     };
   }
 
-  const { name , bio, reputation, image } = user;
+  const { name, bio, reputation, image } = user;
 
   return {
     title: `${name} | Dev Profile`,
@@ -106,7 +107,11 @@ export async function generateMetadata({
 }
 
 export default async function Profile({ params, searchParams }: RouteParams) {
-  const [{ id }, { page }] = await Promise.all([params, searchParams]);
+  const [{ id }, { page }, session] = await Promise.all([
+    params,
+    searchParams,
+    auth(),
+  ]);
   const [
     { success, data: user },
     {
@@ -131,7 +136,7 @@ export default async function Profile({ params, searchParams }: RouteParams) {
   const { questions, isNext: hasMoreQuestions } = questionsData || {};
   const { answers, isNext: hasMoreAnswers } = answersData || {};
   const { totalQuestions, totalAnswers, badges } = statsData || {};
-
+  const userId = session?.user?.id;
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex justify-between items-start gap-4">
@@ -228,7 +233,11 @@ export default async function Profile({ params, searchParams }: RouteParams) {
                 <section className="mt-5 w-full flex flex-col gap-6">
                   {questions?.map((question) => {
                     return (
-                      <QuestionCard key={question._id} question={question} />
+                      <QuestionCard
+                        showActionButtons={userId === question.author._id}
+                        key={question._id}
+                        question={question}
+                      />
                     );
                   })}
                 </section>
@@ -261,6 +270,7 @@ export default async function Profile({ params, searchParams }: RouteParams) {
                     }) => {
                       return (
                         <AnswerCard
+                          showActionButtons={userId === author._id}
                           key={_id}
                           _id={_id}
                           content={content.slice(0, 77)}
