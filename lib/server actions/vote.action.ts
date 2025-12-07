@@ -52,15 +52,19 @@ async function updateVoteCount(
 export async function createVote(
   params: createVoteParams
 ): Promise<ActionResponse> {
-  const validated = await actionHandler({
-    params,
-    schema: createVoteSchema,
-    authorizetionProccess: true,
-  });
-  if (validated instanceof Error)
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params,
+      schema: createVoteSchema,
+      authorizetionProccess: true,
+    }),
+    mongoose.startSession(),
+  ]);
+  if (validated instanceof Error) {
+    await session.endSession();
     return handleError(validated) as ErrorResponse;
+  }
 
-  const session = await mongoose.startSession();
   session.startTransaction();
 
   const { targetId, targetType, voteType } = validated.params!;
@@ -76,24 +80,26 @@ export async function createVote(
     if (existingVote) {
       if (voteType === existingVote.voteType) {
         // user is trying to unvote
-        await Vote.findByIdAndDelete(existingVote._id).session(session);
-        await updateVoteCount(
-          {
-            targetId,
-            targetType,
-            voteType,
-            change: -1,
-          },
-          session
-        );
+        await Promise.all([
+          Vote.findByIdAndDelete(existingVote._id).session(session),
+          updateVoteCount(
+            {
+              targetId,
+              targetType,
+              voteType,
+              change: -1,
+            },
+            session
+          ),
+        ]);
       } else {
         // user is trying to change his vote
-        await Vote.findByIdAndUpdate(
-          existingVote._id,
-          { voteType },
-          { new: true, session }
-        );
         await Promise.all([
+          Vote.findByIdAndUpdate(
+            existingVote._id,
+            { voteType },
+            { new: true, session }
+          ),
           updateVoteCount(
             {
               targetId,
@@ -144,17 +150,18 @@ export async function createVote(
 
     after(async () => {
       const model = targetType === "question" ? Question : Answer;
-      const target = await model.findById(targetId) as IQuestionDoc | IAnswerDoc;
+      const target = (await model.findById(targetId)) as
+        | IQuestionDoc
+        | IAnswerDoc;
 
-        await createInteraction({
-          performerId: userId,
-          action: voteType,
-          actionId: targetId,
-          actionType: targetType,
-          authorId: target.author.toString(),
-        });
+      await createInteraction({
+        performerId: userId,
+        action: voteType,
+        actionId: targetId,
+        actionType: targetType,
+        authorId: target.author.toString(),
       });
-  
+    });
 
     return { success: true } as ActionResponse;
   } catch (error) {

@@ -1,7 +1,7 @@
 import { IUser } from "@/models/user.model";
 import fetchData from "./handlers/fetch";
 import { IAccount } from "@/models/account.model";
-import { ActionResponse, APIResponse, SignInWithOauthParams } from "@/Types/global";
+import { ActionResponse , SignInWithOauthParams } from "@/Types/global";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";

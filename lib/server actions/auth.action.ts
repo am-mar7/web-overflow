@@ -1,7 +1,7 @@
 "use server";
 
 import mongoose from "mongoose";
-import { AuthCredentials } from "@/Types/global";
+import { ActionResponse, AuthCredentials, ErrorResponse } from "@/Types/global";
 import actionHandler from "../handlers/action";
 import handleError from "../handlers/error";
 import { SignInSchema, SignUpSchema } from "../validation";
@@ -11,27 +11,34 @@ import Account, { IAccountDoc } from "@/models/account.model";
 import { signIn } from "@/auth";
 import { NotFoundError } from "../http-errors";
 
-export async function credentialsSignUp(params: AuthCredentials) {
-  const validated = await actionHandler({
-    params: params,
-    schema: SignUpSchema,
-  });
+export async function credentialsSignUp(
+  params: AuthCredentials
+): Promise<ActionResponse> {
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params: params,
+      schema: SignUpSchema,
+    }),
+    mongoose.startSession(),
+  ]);
   if (validated instanceof Error) {
-    return handleError(validated);
+    await session.endSession();
+    return handleError(validated) as ErrorResponse;
   }
-
   const { name, email, password } = validated.params!;
 
-  const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     const existingUser = await User.findOne({ email }).session(session);
     if (existingUser) throw new Error("User aleady exits");
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const [newUser] = await User.create([{ name, email }], { session });
-
+    const [hashedPassword, [newUser]] = await Promise.all([
+      bcrypt.hash(password, 12),
+      User.create([{ name, email }], { session }),
+    ]);
+    if (!newUser) throw new Error("Failed to create new User");
+    
     await Account.create(
       [
         {
@@ -51,7 +58,7 @@ export async function credentialsSignUp(params: AuthCredentials) {
     return { success: true };
   } catch (error) {
     session.abortTransaction();
-    return handleError(error);
+    return handleError(error) as ErrorResponse;
   } finally {
     session.endSession();
   }

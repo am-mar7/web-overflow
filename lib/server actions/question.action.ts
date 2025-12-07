@@ -35,19 +35,23 @@ import { cache } from "react";
 export async function createQuestion(
   params: QuestionParams
 ): Promise<ActionResponse<Question | null>> {
-  const validatedParams = await actionHandler({
-    params,
-    schema: createQuestionSchema,
-    authorizetionProccess: true,
-  });
-  if (validatedParams instanceof Error)
-    return handleError(validatedParams) as ErrorResponse;
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params,
+      schema: createQuestionSchema,
+      authorizetionProccess: true,
+    }),
+    mongoose.startSession(),
+  ]);
+  if (validated instanceof Error) {
+    await session.endSession();
+    return handleError(validated) as ErrorResponse;
+  }
 
-  const session = await mongoose.startSession();
   session.startTransaction();
 
-  const { title, content, tags } = validatedParams.params!;
-  const userId = validatedParams.session?.user?.id;
+  const { title, content, tags } = validated.params!;
+  const userId = validated.session?.user?.id;
   try {
     if (!userId) throw new UnauthorizedError();
 
@@ -63,17 +67,21 @@ export async function createQuestion(
     );
     if (!question) throw new Error("Failed to create question");
 
+    const tagResults = await Promise.all(
+      tags.map((tag) =>
+        Tag.findOneAndUpdate(
+          { name: { $regex: new RegExp(`^${tag}$`, "i") } },
+          { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
+          { upsert: true, new: true, session }
+        )
+      )
+    );
+
     const tagIds: ObjectId[] = [];
     const tagDocs: ITagQuestion[] = [];
 
-    for (const tag of tags) {
-      const newTag = await Tag.findOneAndUpdate(
-        { name: { $regex: new RegExp(`^${tag}$`, "i") } },
-        { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
-        { upsert: true, new: true, session }
-      );
-      if (!newTag) throw new Error(`Failed to create tag: ${tag}`);
-
+    for (const newTag of tagResults) {
+      if (!newTag) throw new Error(`Failed to create tag`);
       tagIds.push(newTag._id);
       tagDocs.push({
         tag: newTag._id,
@@ -81,13 +89,15 @@ export async function createQuestion(
       });
     }
 
-    await TagQuestion.insertMany(tagDocs, { session });
+    await Promise.all([
+      TagQuestion.insertMany(tagDocs, { session }),
+      questionModel.findByIdAndUpdate(
+        question._id,
+        { $push: { tags: { $each: tagIds } } },
+        { session }
+      ),
+    ]);
 
-    await questionModel.findByIdAndUpdate(
-      question._id,
-      { $push: { tags: { $each: tagIds } } },
-      { session }
-    );
     await session.commitTransaction();
 
     revalidatePath("/", "layout");
@@ -117,19 +127,23 @@ export async function createQuestion(
 export async function updateQuestion(
   params: updateQuestionParams
 ): Promise<ActionResponse<Question | null>> {
-  const validatedParams = await actionHandler({
-    params,
-    schema: editQuestionSchema,
-    authorizetionProccess: true,
-  });
-  if (validatedParams instanceof Error)
-    return handleError(validatedParams) as ErrorResponse;
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params,
+      schema: editQuestionSchema,
+      authorizetionProccess: true,
+    }),
+    mongoose.startSession(),
+  ]);
+  if (validated instanceof Error) {
+    await session.endSession();
+    return handleError(validated) as ErrorResponse;
+  }
 
-  const session = await mongoose.startSession();
   session.startTransaction();
 
-  const { title, content, tags, questionId } = validatedParams.params!;
-  const userId = validatedParams.session?.user?.id;
+  const { title, content, tags, questionId } = validated.params!;
+  const userId = validated.session?.user?.id;
 
   try {
     if (!userId) throw new UnauthorizedError();
@@ -157,17 +171,21 @@ export async function updateQuestion(
       (tag) => !tags.some((t) => t.toLowerCase() === tag.name.toLowerCase())
     );
 
+    const tagResults = await Promise.all(
+      tagsToAdd.map((tag) =>
+        Tag.findOneAndUpdate(
+          { name: { $regex: new RegExp(`^${tag}$`, "i") } },
+          { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
+          { upsert: true, new: true, session }
+        )
+      )
+    );
+
     const tagIds: ObjectId[] = [];
     const tagDocs: ITagQuestion[] = [];
 
-    for (const tag of tagsToAdd) {
-      const newTag = await Tag.findOneAndUpdate(
-        { name: { $regex: new RegExp(`^${tag}$`, "i") } },
-        { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
-        { upsert: true, new: true, session }
-      );
-      if (!newTag) throw new Error(`Failed to create tag: ${tag}`);
-
+    for (const newTag of tagResults) {
+      if (!newTag) throw new Error(`Failed to create tag: ${newTag}`);
       tagIds.push(newTag._id);
       tagDocs.push({
         tag: newTag._id,
@@ -175,36 +193,42 @@ export async function updateQuestion(
       });
     }
 
+    const finalOperations = [];
+
     if (tagsToRemove.length > 0) {
       const tagsToRemoveIds = tagsToRemove.map((tag) => tag._id);
-      await Tag.updateMany(
-        { _id: { $in: tagsToRemoveIds } },
-        { $inc: { questions: -1 } },
-        { session }
-      );
-
-      await TagQuestion.deleteMany(
-        { tag: { $in: tagsToRemoveIds }, question: question._id },
-        { session }
-      );
-
-      await questionModel.findByIdAndUpdate(
-        question._id,
-        { $pull: { tags: { $in: tagsToRemoveIds } } },
-        { session }
+      finalOperations.push(
+        Tag.updateMany(
+          { _id: { $in: tagsToRemoveIds } },
+          { $inc: { questions: -1 } },
+          { session }
+        ),
+        TagQuestion.deleteMany(
+          { tag: { $in: tagsToRemoveIds }, question: question._id },
+          { session }
+        ),
+        questionModel.findByIdAndUpdate(
+          question._id,
+          { $pull: { tags: { $in: tagsToRemoveIds } } },
+          { session }
+        )
       );
     }
     if (tagIds.length)
-      await questionModel.findByIdAndUpdate(
-        question._id,
-        { $push: { tags: { $each: tagIds } } },
-        { session }
+      finalOperations.push(
+        questionModel.findByIdAndUpdate(
+          question._id,
+          { $push: { tags: { $each: tagIds } } },
+          { session }
+        )
       );
 
-    if (tagDocs.length) await TagQuestion.insertMany(tagDocs, { session });
+    if (tagDocs.length)
+      finalOperations.push(TagQuestion.insertMany(tagDocs, { session }));
 
+    if (finalOperations.length) await Promise.all(finalOperations);
+    await Tag.deleteMany({ questions: { $lte: 0 } }, { session })
     await session.commitTransaction();
-    await question.save();
 
     revalidatePath("/", "layout");
 
@@ -237,14 +261,15 @@ export const getQuestion = cache(async function getQuestion(
     params: { questionId },
     schema: getQuestionSchema,
   });
+
   if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
+
   try {
     const question = await questionModel
       .findOne({ _id: questionId })
       .populate("tags")
       .populate("author");
-    console.log("Question", question);
 
     if (!question) throw new NotFoundError("Question");
 
@@ -276,7 +301,7 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
 
   try {
     if (filter === "recommended") {
-      return { success: true, data: { questions: [], isNext: false } };
+      return await getRecommendedQuestions();
     }
     switch (filter) {
       case "newest":
@@ -296,18 +321,18 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
         { content: { $regex: query, $options: "i" } },
       ];
     }
-
-    const questionCount = await questionModel
-      .find(filterQuery)
-      .countDocuments();
     const skip = (page - 1) * pageSize;
-    const questions = await questionModel
-      .find(filterQuery)
-      .sort(sortCriteria)
-      .limit(pageSize)
-      .skip(skip)
-      .populate("tags", "name")
-      .populate("author", "name image");
+
+    const [questionCount, questions] = await Promise.all([
+      questionModel.countDocuments(filterQuery),
+      questionModel
+        .find(filterQuery)
+        .sort(sortCriteria)
+        .limit(pageSize)
+        .skip(skip)
+        .populate("tags", "name")
+        .populate("author", "name image"),
+    ]);
 
     const isNext = questionCount > skip + questions.length;
 
@@ -341,18 +366,25 @@ export async function getHotQuestions(): Promise<ActionResponse<Question[]>> {
 export async function deleteQuestion(
   params: deleteQuestionParams
 ): Promise<ActionResponse> {
-  const validate = await actionHandler({
-    params,
-    schema: deleteQuestionSchema,
-    authorizetionProccess: true,
-  });
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params,
+      schema: deleteQuestionSchema,
+      authorizetionProccess: true,
+    }),
+    mongoose.startSession(),
+  ]);
 
-  if (validate instanceof Error) return handleError(validate) as ErrorResponse;
+  if (validated instanceof Error) {
+    await session.endSession();
+    return handleError(validated) as ErrorResponse;
+  }
 
-  const { questionId } = validate.params!;
-  const userId = validate.session?.user?.id;
-  const session = await mongoose.startSession();
+  const { questionId } = validated.params!;
+  const userId = validated.session?.user?.id;
+
   session.startTransaction();
+
   try {
     const question = (await questionModel
       .findById(questionId)
@@ -364,37 +396,49 @@ export async function deleteQuestion(
         "You are not authorized to delete this question"
       );
 
-    await Collection.deleteMany({ question: questionId }).session(session);
-    await TagQuestion.deleteMany({ question: questionId }).session(session);
+    const deleteOperations = [];
+    deleteOperations.push(
+      Collection.deleteMany({ question: questionId }).session(session),
+      TagQuestion.deleteMany({ question: questionId }).session(session),
+      Vote.deleteMany({
+        targetType: "question",
+        targetId: questionId,
+      }).session(session)
+    );
 
-    await Vote.deleteMany({
-      targetType: "question",
-      targetId: questionId,
-    }).session(session);
+    if (question.tags.length > 0) {
+      deleteOperations.push(
+        Tag.updateMany(
+          { _id: { $in: question.tags } },
+          { $inc: { questions: -1 } },
+          { session }
+        ),        
+      );
+    }
 
     const answers = (await Answer.find({ question: questionId }).session(
       session
     )) as IAnswerDoc[];
 
-    if (question.tags.length > 0) {
-      await Tag.updateMany(
-        { _id: { $in: question.tags } },
-        { $inc: { questions: -1 } },
-        { session }
-      );
-      await Tag.deleteMany({ questions: { $lte: 0 } }, { session });
-    }
-
     if (answers.length) {
-      await Answer.deleteMany({ question: questionId }).session(session);
+      deleteOperations.push(
+        Answer.deleteMany({ question: questionId }).session(session)
+      );
       const answersIds = answers.map((answer) => answer._id);
-      await Vote.deleteMany({
-        targetType: "answer",
-        targetId: { $in: answersIds },
-      }).session(session);
+      deleteOperations.push(
+        Vote.deleteMany({
+          targetType: "answer",
+          targetId: { $in: answersIds },
+        }).session(session)
+      );
     }
 
-    await questionModel.findByIdAndDelete(questionId).session(session);
+    deleteOperations.push(
+      questionModel.findByIdAndDelete(questionId).session(session)
+    );
+
+    await Promise.all(deleteOperations);
+    await Tag.deleteMany({ questions: { $lte: 0 } }, { session });
     await session.commitTransaction();
 
     revalidatePath("/", "layout");
@@ -457,4 +501,13 @@ export async function incrementViews(
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
+}
+
+async function getRecommendedQuestions(): Promise<
+  ActionResponse<{
+    questions: Question[];
+    isNext: boolean;
+  }>
+> {
+  return handleError("Not Implemented") as ErrorResponse;
 }

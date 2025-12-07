@@ -27,19 +27,23 @@ import { createInteraction } from "./interaction.action";
 export async function createAnswer(
   params: createAnswerParams
 ): Promise<ActionResponse<IAnswerDoc>> {
-  const validated = await actionHandler({
-    params,
-    schema: createAnswerSchema,
-    authorizetionProccess: true,
-  });
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params,
+      schema: createAnswerSchema,
+      authorizetionProccess: true,
+    }),
+    mongoose.startSession(),
+  ]);
 
-  if (validated instanceof Error)
+  if (validated instanceof Error) {
+    await session.endSession();
     return handleError(validated) as ErrorResponse;
+  }
 
   const userId = validated?.session?.user?.id;
 
   const { questionId, content } = validated.params!;
-  const session = await mongoose.startSession();
 
   session.startTransaction();
 
@@ -120,16 +124,17 @@ export async function getAnswers(params: getAnswersParams): Promise<
   }
 
   try {
-    const totalAnswers = await answerModel.countDocuments({
-      question: questionId,
-    });
-
-    const answers = await answerModel
-      .find({ question: questionId })
-      .populate("author")
-      .sort(sortCriteria)
-      .skip(skip)
-      .limit(pageSize);
+    const [totalAnswers, answers] = await Promise.all([
+      answerModel.countDocuments({
+        question: questionId,
+      }),
+      answerModel
+        .find({ question: questionId })
+        .populate("author")
+        .sort(sortCriteria)
+        .skip(skip)
+        .limit(pageSize),
+    ]);
 
     const isNext = totalAnswers > skip + answers.length;
 
@@ -149,17 +154,23 @@ export async function getAnswers(params: getAnswersParams): Promise<
 export async function deleteAnswer(
   params: deleteAnswerParams
 ): Promise<ActionResponse> {
-  const validate = await actionHandler({
-    params,
-    schema: deleteAnswerSchema,
-    authorizetionProccess: true,
-  });
+  const [validated, session] = await Promise.all([
+    actionHandler({
+      params,
+      schema: deleteAnswerSchema,
+      authorizetionProccess: true,
+    }),
+    mongoose.startSession(),
+  ]);
 
-  if (validate instanceof Error) return handleError(validate) as ErrorResponse;
+  if (validated instanceof Error) {
+    await session.endSession();
+    return handleError(validated) as ErrorResponse;
+  }
 
-  const { answerId } = validate.params!;
-  const userId = validate.session?.user?.id;
-  const session = await mongoose.startSession();
+  const { answerId } = validated.params!;
+  const userId = validated.session?.user?.id;
+
   session.startTransaction();
   try {
     const answer = (await answerModel
@@ -172,16 +183,16 @@ export async function deleteAnswer(
         "You are not authorized to delete this answer"
       );
 
-    await Vote.deleteMany({
-      targetType: "answer",
-      targetId: answer._id,
-    }).session(session);
-
-    await Question.findByIdAndUpdate(answer.question, {
-      $inc: { answers: -1 },
-    }).session(session);
-
-    await answerModel.findByIdAndDelete(answerId).session(session);
+    await Promise.all([
+      Vote.deleteMany({
+        targetType: "answer",
+        targetId: answer._id,
+      }).session(session),
+      Question.findByIdAndUpdate(answer.question, {
+        $inc: { answers: -1 },
+      }).session(session),
+      answerModel.findByIdAndDelete(answerId).session(session),
+    ]);
 
     await session.commitTransaction();
 

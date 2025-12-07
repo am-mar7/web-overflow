@@ -63,12 +63,10 @@ export async function getUsers(
   }
 
   try {
-    const usersCount = await userModel.countDocuments(filterQuery);
-    const users = await userModel
-      .find(filterQuery)
-      .sort(sortCriteria)
-      .skip(skip)
-      .limit(pageSize);
+    const [usersCount, users] = await Promise.all([
+      userModel.countDocuments(filterQuery),
+      userModel.find(filterQuery).sort(sortCriteria).skip(skip).limit(pageSize),
+    ]);
 
     const isNext = usersCount > skip + users.length;
     return {

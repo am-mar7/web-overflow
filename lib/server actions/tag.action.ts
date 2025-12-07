@@ -21,7 +21,7 @@ import { NotFoundError } from "../http-errors";
 export async function getTags(
   params: PaginatedSearchParams
 ): Promise<ActionResponse<{ isNext: boolean; data: Tag[] }>> {
-  const validated = actionHandler({
+  const validated = await actionHandler({
     params,
     schema: PaginatedSearchParamsSchema,
   });
@@ -56,14 +56,17 @@ export async function getTags(
         break;
     }
 
-    const tagsCount = await tagModel.countDocuments(filterQuery);
     const skip = (page - 1) * pageSize;
-    const tags = await tagModel
-      .find(filterQuery)
-      .sort(sortCriteria)
-      .lean()
-      .limit(pageSize)
-      .skip(skip);
+
+    const [tagsCount, tags] = await Promise.all([
+      tagModel.countDocuments(filterQuery),
+      tagModel
+        .find(filterQuery)
+        .sort(sortCriteria)
+        .lean()
+        .limit(pageSize)
+        .skip(skip),
+    ]);
 
     const isNext = tagsCount > skip + tags.length;
 
@@ -81,7 +84,7 @@ export async function getTagQuestions(
 ): Promise<
   ActionResponse<{ isNext: boolean; questions: Question[]; tag: Tag }>
 > {
-  const validated = actionHandler({
+  const validated = await actionHandler({
     params,
     schema: getTagQuestionsSchema,
   });
@@ -97,9 +100,6 @@ export async function getTagQuestions(
     const tag = (await tagModel.findById(tagId)) as Tag;
     if (!tag) throw new NotFoundError("Tag");
 
-    if (filter === "recommended") {
-      return { success: true, data: { tag, questions: [], isNext: false } };
-    }
     switch (filter) {
       case "newest":
         sortCriteria = { createdAt: -1 };
@@ -109,6 +109,8 @@ export async function getTagQuestions(
         break;
       case "popular":
         sortCriteria = { upvotes: -1 };
+      default:
+        sortCriteria = { createdAt: -1, upvotes: -1 };
     }
 
     const filterQuery: mongoose.QueryFilter<typeof questionModel> = {
@@ -121,14 +123,17 @@ export async function getTagQuestions(
       ];
     }
 
-    const questionsCount = await questionModel.countDocuments(filterQuery);
-    const questions = await questionModel
-      .find(filterQuery)
-      .populate("author")
-      .populate("tags")
-      .sort(sortCriteria)
-      .skip(skip)
-      .limit(pageSize);
+    const [questionsCount, questions] = await Promise.all([
+      questionModel.countDocuments(filterQuery),
+      questionModel
+        .find(filterQuery)
+        .populate("author")
+        .populate("tags")
+        .sort(sortCriteria)
+        .skip(skip)
+        .limit(pageSize),
+    ]);
+
     const isNext = questionsCount > questions.length + skip;
 
     return {
