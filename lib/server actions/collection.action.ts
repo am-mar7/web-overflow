@@ -14,6 +14,8 @@ import { UnauthorizedError } from "../http-errors";
 import { Collection as collectionModel } from "@/models";
 import { revalidatePath } from "next/cache";
 import ROUTES from "@/constants/routes";
+import { createInteraction } from "./interaction.action";
+import { after } from "next/server";
 
 export async function toggleSaveQuestion(
   questionId: string
@@ -55,6 +57,16 @@ export async function toggleSaveQuestion(
         { session }
       );
       if (!collection) throw new Error("Failed to add question collection");
+
+      after(async () => {
+        await createInteraction({
+          performerId: userId,
+          action: "bookmark",
+          actionId: questionId,
+          actionType: "question",
+          authorId: userId,
+        });
+      });
     }
     await session.commitTransaction();
     revalidatePath(ROUTES.QUESTION(questionId));

@@ -7,6 +7,7 @@ import {
   PaginatedSearchParams,
   Question,
   QuestionParams,
+  RecommendationParams,
   updateQuestionParams,
 } from "@/Types/global";
 import actionHandler from "../handlers/action";
@@ -19,18 +20,19 @@ import {
 } from "../validation";
 import handleError from "../handlers/error";
 import questionModel, { IQuestionDoc } from "@/models/question.model";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose, { ObjectId, Types } from "mongoose";
 import TagQuestion, { ITagQuestion } from "@/models/tag-question.model";
 import Tag, { ITagDoc } from "@/models/tag.model";
 import { NotFoundError, UnauthorizedError } from "../http-errors";
 import { dbConnect } from "../mongoose";
 import { revalidatePath } from "next/cache";
-import { Answer, Collection, ViewQuestion, Vote } from "@/models";
+import { Answer, Collection, Interaction, ViewQuestion, Vote } from "@/models";
 import { IAnswerDoc } from "@/models/answer.model";
 import { after } from "next/server";
 import { createInteraction } from "./interaction.action";
 import ROUTES from "@/constants/routes";
 import { cache } from "react";
+import { auth } from "@/auth";
 
 export async function createQuestion(
   params: QuestionParams
@@ -227,7 +229,7 @@ export async function updateQuestion(
       finalOperations.push(TagQuestion.insertMany(tagDocs, { session }));
 
     if (finalOperations.length) await Promise.all(finalOperations);
-    await Tag.deleteMany({ questions: { $lte: 0 } }, { session })
+    await Tag.deleteMany({ questions: { $lte: 0 } }, { session });
     await session.commitTransaction();
 
     revalidatePath("/", "layout");
@@ -298,10 +300,22 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
   const filterQuery: mongoose.QueryFilter<typeof questionModel> = {};
 
   const { query, filter, page = 1, pageSize = 10 } = validate.params!;
+  const skip = (page - 1) * pageSize;
 
   try {
     if (filter === "recommended") {
-      return await getRecommendedQuestions();
+      const session = await auth();
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        return { success: true, data: { questions: [], isNext: false } };
+      }
+      return await getRecommendedQuestions({
+        skip,
+        query,
+        userId,
+        limit: pageSize,
+      });
     }
     switch (filter) {
       case "newest":
@@ -321,7 +335,6 @@ export async function getQuestions(params: PaginatedSearchParams): Promise<
         { content: { $regex: query, $options: "i" } },
       ];
     }
-    const skip = (page - 1) * pageSize;
 
     const [questionCount, questions] = await Promise.all([
       questionModel.countDocuments(filterQuery),
@@ -412,7 +425,7 @@ export async function deleteQuestion(
           { _id: { $in: question.tags } },
           { $inc: { questions: -1 } },
           { session }
-        ),        
+        )
       );
     }
 
@@ -502,12 +515,101 @@ export async function incrementViews(
     return handleError(error) as ErrorResponse;
   }
 }
-
-async function getRecommendedQuestions(): Promise<
+// runs on try catch blocks
+async function getRecommendedQuestions({
+  userId,
+  limit,
+  skip,
+  query,
+}: RecommendationParams): Promise<
   ActionResponse<{
     questions: Question[];
     isNext: boolean;
   }>
 > {
-  return handleError("Not Implemented") as ErrorResponse;
+  const [excludedInteraction, includedInteraction, answeredQuestions] =
+    await Promise.all([
+      Interaction.find({
+        authorId: userId,
+        actionType: "question",
+        action: { $in: ["bookmark", "post"] },
+      }).distinct("actionId"),
+
+      Interaction.find({
+        authorId: userId,
+        actionType: "question",
+        action: { $in: ["view", "upvote"] },
+      }).distinct("actionId"),
+
+      Answer.find({ author: userId }).distinct("question"),
+    ]);
+
+  const excludedQuestionIds = [
+    ...new Set([
+      ...excludedInteraction.map((actionId) => actionId.toString()),
+      ...answeredQuestions.map((question) => question.toString()),
+    ]),
+  ];
+  const includedQuestionIds = [
+    ...new Set(
+      includedInteraction
+        .map((actionId) => actionId.toString())
+        .filter((id) => !excludedQuestionIds.includes(id))
+    ),
+  ];
+  const interactedQuestionIds = [
+    ...excludedQuestionIds,
+    ...includedQuestionIds,
+  ];
+
+  const includedQuestionTags = await questionModel
+    .find({
+      _id: { $in: interactedQuestionIds },
+    })
+    .select("tags");
+
+  const tagIds = [
+    ...new Set(
+      includedQuestionTags.flatMap((q) =>
+        q.tags.map((tag: Types.ObjectId) => tag.toString())
+      )
+    ),
+  ];
+
+  const filterQuery: mongoose.QueryFilter<typeof questionModel> = {
+    _id: { $nin: excludedQuestionIds },
+    tags: { $in: tagIds },
+  };
+  if (query) {
+    filterQuery.$or = [
+      { title: { $regex: query, $options: "i" } },
+      { content: { $regex: query, $options: "i" } },
+    ];
+  }
+
+  const [recommendedQuestions, recommendedQuestionsCount] = await Promise.all([
+    questionModel
+      .find(filterQuery)
+      .sort({ createdAt: -1 })
+      .populate("tags")
+      .populate("author")
+      .skip(skip)
+      .limit(limit),
+
+    questionModel.countDocuments({
+      ...filterQuery,
+      _id: { $nin: excludedQuestionIds },
+      tags: { $in: tagIds },
+    }),
+  ]);
+
+  const isNext = recommendedQuestionsCount > recommendedQuestions.length + skip;
+
+  return {
+    success: true,
+    data: {
+      questions: JSON.parse(JSON.stringify(recommendedQuestions)),
+      isNext,
+    },
+  };
 }

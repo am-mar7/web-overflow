@@ -206,3 +206,10 @@ interface GlobalSearchedItem {
   type: "question" | "answer" | "user" | "tag";
   title: string;
 }
+
+interface RecommendationParams {
+  userId: string;
+  query?: string;
+  skip: number;
+  limit: number;
+}
