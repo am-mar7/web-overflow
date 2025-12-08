@@ -9,7 +9,7 @@ export default function HomePageLoading() {
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <section className="flex gap-5 flex-col-reverse sm:flex-row justify-between">
         <h1 className="h1-bold text-dark200_light800"> All Questions</h1>
-        <Skeleton className="h-[42px] sm:w-[180px]" />
+        <Skeleton className="h-[42px] w-full sm:w-[180px]" />
       </section>
 
       <section className="mt-6">
@@ -36,11 +36,10 @@ export default function HomePageLoading() {
             {/* Tags and Stats */}
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-6 w-8 rounded-full" />
+                <Skeleton className="h-6 w-8 rounded-full" />
+                <Skeleton className="h-6 w-8 rounded-full" />
               </div>
-              <Skeleton className="h-6 w-32" />
             </div>
           </div>
         ))}

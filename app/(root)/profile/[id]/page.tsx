@@ -139,20 +139,22 @@ export default async function Profile({ params, searchParams }: RouteParams) {
   const userId = session?.user?.id;
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
-      <section className="flex justify-between items-start gap-4">
-        <div className="flex max-sm:flex-col gap-4 items-center">
-          <div className="w-32 h-32">
+      <section className="flex flex-col gap-4">
+        <div className="flex-between gap-4 items-center">
+          <div className="w-32 h-32 ">
             <UserAvatar user={user} width={32} height={32} />
           </div>
-          <div>
-            <p className="font-space-grotesk py-0! h1-semibold">{name}</p>
-            <p className="font-space-grotesk h3-semibold">{email}</p>
-          </div>
+          <p className="flex-center gap-2">
+            <span className="text-light-500 font-space-grotesk">
+              reputation:
+            </span>
+            <span>{reputation}</span>
+          </p>
         </div>
-        <p className="flex-center gap-2">
-          <span className="text-light-500 font-space-grotesk">reputation:</span>
-          <span>{reputation}</span>
-        </p>
+        <div>
+          <p className="font-space-grotesk py-0! h1-semibold">{name}</p>
+          <p className="font-space-grotesk h3-semibold">{email}</p>
+        </div>
       </section>
 
       <section>

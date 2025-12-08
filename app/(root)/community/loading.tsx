@@ -28,8 +28,8 @@ export default function CommunityLoading() {
         {Array.from({ length: 10 }).map((_, idx) => (
           <div key={idx} className="flex-center gap-3 flex-col bg-light700_dark200 py-4 rounded-lg">
             <Skeleton className="h-[75px] w-[75px] rounded-full"/>
-            <Skeleton className="h-4 w-[150px]"/>
-            <Skeleton className="h-6 w-[180px]"/>
+            <Skeleton className="h-4 w-[150px] max-w-3/4"/>
+            <Skeleton className="h-6 w-[180px] max-w-5/6"/>
           </div>
         ))}
       </div>

@@ -9,13 +9,13 @@ export default function QuestionDetailsloading() {
         <section className="flex-between">
           <div className="flex-center gap-2">
             <Skeleton className="h-6 w-6 rounded-full" />
-            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-22" />
           </div>
 
           <div className="flex-center gap-3">
-            <Skeleton className="h-10 w-24" />
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-10 w-10" />
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-4" />
           </div>
         </section>
 
@@ -24,9 +24,9 @@ export default function QuestionDetailsloading() {
           <Skeleton className="h-8 w-3/4 mb-3" />
 
           <div className="flex gap-3 mt-3">
-            <Skeleton className="h-5 w-28" />
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-5 w-1/3 max-w-28" />
+            <Skeleton className="h-5 w-1/4 max-w-20" />
+            <Skeleton className="h-5 w-1/4 max-w-24" />
           </div>
         </section>
 
@@ -41,9 +41,9 @@ export default function QuestionDetailsloading() {
 
         {/* Tags Section */}
         <section className="flex gap-2 my-5">
-          <Skeleton className="h-8 w-20 rounded-md" />
-          <Skeleton className="h-8 w-24 rounded-md" />
-          <Skeleton className="h-8 w-16 rounded-md" />
+          <Skeleton className="h-8 w-12 rounded-md" />
+          <Skeleton className="h-8 w-12 rounded-md" />
+          <Skeleton className="h-8 w-12 rounded-md" />
         </section>
       </div>
 
@@ -60,9 +60,9 @@ export default function QuestionDetailsloading() {
               <div className="flex-between mb-3">
                 <div className="flex-center gap-2">
                   <Skeleton className="h-6 w-6 rounded-full" />
-                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 w-16 sm:w-32" />
                 </div>
-                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-1/3 max-w-24" />
               </div>
               
               <div className="space-y-2">

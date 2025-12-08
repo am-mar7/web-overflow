@@ -174,7 +174,6 @@ export default async function QuestionDetails({
   });
 
   const hasSavedPromise = hasSavedQuestion(question._id);
-
   return (
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       <div className="bg-light700_dark300 px-5 py-2.5 rounded-lg shadow-md dark:shadow-none">
@@ -202,7 +201,7 @@ export default async function QuestionDetails({
               hasSavedPromise={hasSavedPromise}
             />
             {userId === question.author._id && (
-              <ActionsButton navigate type="question" authorId={userId} id={id} />
+              <ActionsButton navigate type="question" id={id} />
             )}
           </div>
         </section>

@@ -39,11 +39,10 @@ export default function CollectionLoading() {
             {/* Tags and Stats */}
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-6 w-12 rounded-full" />
+                <Skeleton className="h-6 w-12 rounded-full" />
+                <Skeleton className="h-6 w-12 rounded-full" />
               </div>
-              <Skeleton className="h-6 w-32" />
             </div>
           </div>
         ))}

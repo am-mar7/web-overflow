@@ -11,7 +11,7 @@ export default function CollectionLoading() {
         <h1 className="h1-bold text-dark200_light800">Saved Questions</h1>
       </section>
 
-      <section className="mt-6 flex gap-2">
+      <section className="mt-6 flex flex-col sm:flex-row gap-2">
         <div className="w-full">
           <LocalSearch
             route={ROUTES.COLLECTIONS}
@@ -36,11 +36,10 @@ export default function CollectionLoading() {
             {/* Tags and Stats */}
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-6 w-8 rounded-full" />
+                <Skeleton className="h-6 w-8 rounded-full" />
+                <Skeleton className="h-6 w-8 rounded-full" />
               </div>
-              <Skeleton className="h-6 w-32" />
             </div>
           </div>
         ))}

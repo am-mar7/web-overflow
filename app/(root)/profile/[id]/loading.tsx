@@ -5,32 +5,32 @@ export default function ProfileLoading() {
     <div className="min-h-screen px-3 py-5 sm:px-6 sm:py-10">
       {/* Profile Header Section */}
       <section className="flex justify-between items-start gap-4 bg-light700_dark200 p-4">
-        <div className="flex max-sm:flex-col gap-4 items-center">
+        <div className="flex flex-col gap-4 sm:items-center w-full">
           {/* Avatar Skeleton */}
-          <div className="w-32 h-32">
-            <Skeleton className="w-full h-full rounded-full" />
+          <div className="flex-between items-start w-full">
+            <div className="w-22 h-22 sm:w-32 sm:h-32">
+              <Skeleton className="w-full h-full rounded-full" />
+            </div>
+            {/* Reputation Skeleton */}
+            <div className="flex-center gap-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-10" />
+            </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             {/* Name Skeleton */}
-            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-8 w-3/4 max-w-48" />
             {/* Email Skeleton */}
-            <Skeleton className="h-7 w-64" />
+            <Skeleton className="h-7 w-5/6 max-w-64" />
           </div>
-        </div>
-
-        {/* Reputation Skeleton */}
-        <div className="flex-center gap-2">
-          <Skeleton className="h-6 w-20" />
-          <Skeleton className="h-6 w-12" />
         </div>
       </section>
-
       {/* Profile Links Section */}
       <section className="bg-light700_dark200 p-4 mt-2 ">
         <div className="flex-start mt-6 gap-4 sm:gap-6">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-6 w-1/3" />
         </div>
 
         {/* Bio Skeleton */}
@@ -39,8 +39,6 @@ export default function ProfileLoading() {
           <Skeleton className="h-4 w-3/4" />
         </div>
       </section>
-
-      {/* Stats Section */}
       <section>
         <Skeleton className="h-7 w-20 mt-10 mb-4" />
         <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
@@ -74,7 +72,6 @@ export default function ProfileLoading() {
         </div>
       </section>
 
-      {/* Content Section - No Tabs Component */}
       <section className="mt-12 flex flex-col md:flex-row gap-10">
         <div className="w-full md:w-2/3">
           {/* Tab buttons skeleton */}
@@ -102,11 +99,10 @@ export default function ProfileLoading() {
                 {/* Tags and Stats */}
                 <div className="flex justify-between items-center">
                   <div className="flex gap-2">
-                    <Skeleton className="h-6 w-16 rounded-full" />
-                    <Skeleton className="h-6 w-16 rounded-full" />
-                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-8 rounded-full" />
+                    <Skeleton className="h-6 w-8 rounded-full" />
+                    <Skeleton className="h-6 w-8 rounded-full" />
                   </div>
-                  <Skeleton className="h-5 w-32" />
                 </div>
               </div>
             ))}
@@ -124,7 +120,10 @@ export default function ProfileLoading() {
           <Skeleton className="h-7 w-24 mb-4" />
           <div className="space-y-3 py-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div  key={i} className="flex-between bg-light700_dark200 p-4 rounded-lg">
+              <div
+                key={i}
+                className="flex-between bg-light700_dark200 p-4 rounded-lg"
+              >
                 <Skeleton className="h-6 w-18 rounded-lg" />
                 <Skeleton className="h-6 w-6 rounded-full" />
               </div>

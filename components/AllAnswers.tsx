@@ -31,7 +31,7 @@ export default async function AllAnswers({
   return (
     <div>
       <div className="flex-between mt-6">
-        <h3 className="text-primary-gradient body-bold ">
+        <h3 className="text-primary-gradient body-bold w-full bg-amber-300">
           {totalAnswers} {totalAnswers === 1 ? "Answer" : "Answers"}
         </h3>
         {totalAnswers ? (
