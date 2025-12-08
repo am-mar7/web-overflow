@@ -39,20 +39,20 @@ export async function generateMetadata({
     };
   }
 
-  const { title, content, author, tags, views, answers , createdAt } = question;
+  const { title, content, author, tags, views, answers, createdAt } = question;
 
   const plainTextContent = content
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/\s+/g, ' ')     // Normalize whitespace
+    .replace(/<[^>]*>/g, "") // Remove HTML tags
+    .replace(/\s+/g, " ") // Normalize whitespace
     .trim()
-    .slice(0, 155);           // Limit to 155 characters for meta description
+    .slice(0, 155); // Limit to 155 characters for meta description
 
   const tagNames = tags.map((tag: { name: string }) => tag.name);
 
   return {
     title: `${title} - Programming Question`,
     description: `${plainTextContent}... Asked by ${author.name}. ${answers} answers, ${views} views.`,
-    
+
     keywords: [
       ...tagNames,
       "programming question",
@@ -69,14 +69,16 @@ export async function generateMetadata({
       description: plainTextContent,
       type: "article",
       // url: `https://yourdomain.com/questions/${id}`,
-      images: author.image ? [
-        {
-          url: author.image,
-          width: 400,
-          height: 400,
-          alt: `${author.name}'s profile picture`,
-        },
-      ] : [],
+      images: author.image
+        ? [
+            {
+              url: author.image,
+              width: 400,
+              height: 400,
+              alt: `${author.name}'s profile picture`,
+            },
+          ]
+        : [],
       // Article-specific metadata
       publishedTime: getTimeStamp(createdAt),
       authors: [author.name],
@@ -103,7 +105,7 @@ export async function generateMetadata({
     robots: {
       index: true,
       follow: true,
-      "max-snippet": -1,      // Allow unlimited snippet length
+      "max-snippet": -1, // Allow unlimited snippet length
       "max-image-preview": "large",
       "max-video-preview": -1,
       googleBot: {
@@ -129,11 +131,6 @@ export default async function QuestionDetails({
   const { success, data: question } = await getQuestion(id);
   if (!success || !question) return notFound();
 
-  after(async () => {
-    if (userId && question.author._id !== userId)
-      await incrementViews({ questionId: id, viewer: userId });
-  });
-
   const userId = session?.user?.id;
   const {
     upvotes,
@@ -146,6 +143,11 @@ export default async function QuestionDetails({
     tags,
     downvotes,
   } = question;
+
+  after(async () => {
+    if (userId && question.author._id !== userId)
+      await incrementViews({ questionId: id, viewer: userId });
+  });
 
   const metricships = [
     { iconUrl: "/icons/eye.svg", value: views, alt: "views" },
@@ -242,11 +244,13 @@ export default async function QuestionDetails({
       </section>
 
       <section>
-        <AnswerForm
-          questionId={question._id}
-          questionTitle={title}
-          questionContent={content}
-        />
+        {userId && (
+          <AnswerForm
+            questionId={question._id}
+            questionTitle={title}
+            questionContent={content}
+          />
+        )}
       </section>
     </div>
   );

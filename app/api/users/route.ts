@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import handleError from "@/lib/handlers/error";
 import { ValidationError } from "@/lib/http-errors";
 import { dbConnect } from "@/lib/mongoose";
@@ -7,6 +8,15 @@ import { APIErrorResponse } from "@/Types/global";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+
+  const session = await auth();  
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+  
   try {
     await dbConnect();
     const users = await User.find();
