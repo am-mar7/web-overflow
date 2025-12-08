@@ -75,8 +75,7 @@ export default function AnswerForm({
     setIsSubmitting(false);
   };
 
-  const generateAnswer = async () => {
-    setIsAiSubmitting(true);
+  const generateAnswer = async () => {    
     const baseAnswer = editorRef.current?.getMarkdown() || "";
     if (baseAnswer.length < 50) {
       toast.error(
@@ -84,6 +83,7 @@ export default function AnswerForm({
       );
       return;
     }
+    setIsAiSubmitting(true);
     const { success, data, error } = await api.ai.getOPtimizedAnswer(
       questionTitle,
       questionContent,
