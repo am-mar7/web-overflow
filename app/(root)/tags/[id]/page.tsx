@@ -142,7 +142,7 @@ export default async function Tag({ params, searchParams }: RouteParams) {
           empty={{
             title: "No questions found",
             message:
-              "The question board is empty. Maybe it’s waiting for your brilliant question to get things rolling",
+              "if you added a question with that tag you would be the first one to use it isn't that exiting!",
             button: {
               text: "ask question",
               href: ROUTES.ASK_QUESTION,

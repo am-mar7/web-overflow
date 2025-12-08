@@ -132,7 +132,8 @@ export default async function Profile({ params, searchParams }: RouteParams) {
 
   if (!success || !user || !id) return notFound();
 
-  const { name, email, bio, createdAt, portfolio, reputation } = user || {};
+  const { name, email, bio, createdAt, portfolio, reputation, _id } =
+    user || {};
   const { questions, isNext: hasMoreQuestions } = questionsData || {};
   const { answers, isNext: hasMoreAnswers } = answersData || {};
   const { totalQuestions, totalAnswers, badges } = statsData || {};
@@ -225,11 +226,16 @@ export default async function Profile({ params, searchParams }: RouteParams) {
               empty={{
                 title: "No questions found",
                 message:
-                  "Your question board is empty. it's the time for your brilliant question to get things rolling",
-                button: {
-                  text: "ask question",
-                  href: ROUTES.ASK_QUESTION,
-                },
+                  userId === _id
+                    ? "Your question board is empty. it's the time for your brilliant question to get things rolling"
+                    : "",
+                button:
+                  userId === _id
+                    ? {
+                        text: "ask question",
+                        href: ROUTES.ASK_QUESTION,
+                      }
+                    : undefined,
               }}
               render={(questions) => (
                 <section className="mt-5 w-full flex flex-col gap-6">
@@ -256,7 +262,10 @@ export default async function Profile({ params, searchParams }: RouteParams) {
               error={answersError}
               empty={{
                 title: "No answers found",
-                message: "You hav'nt answer any questions before !",
+                message:
+                  userId === _id
+                    ? "You hav'nt answer any questions before !"
+                    : "",
               }}
               render={(answers) => (
                 <section className="mt-5 w-full flex flex-col gap-6">
@@ -302,7 +311,10 @@ export default async function Profile({ params, searchParams }: RouteParams) {
             error={tagsError}
             empty={{
               title: "No Tags found",
-              message: "seems like you did not tag your questions before",
+              message:
+                userId === _id
+                  ? "seems like you did not tag your questions before"
+                  : "",
             }}
             render={(tagsData) => (
               <div className="space-y-3 py-4">

@@ -22,8 +22,8 @@ export default function UserAvatar({
     <Avatar className={`w-${width} h-${height} bg-amber-400`}>
       {image ? (
         <AvatarImage
-          width={200}
-          height={200}
+          width={width * 16}
+          height={height * 16}
           src={image}
           alt={name || email || "User Avatar"}
         />

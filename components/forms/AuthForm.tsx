@@ -32,7 +32,6 @@ export default function AuthForm<T extends FieldValues>({
   defaultValues,
   formType,
 }: AuthFromType<T>) {
-  // ...
   const formSchema: typeof SignInSchema | typeof SignUpSchema =
     formType === "SIGN_IN" ? SignInSchema : SignUpSchema;
 
@@ -113,7 +112,9 @@ export default function AuthForm<T extends FieldValues>({
         </p>
         <Button
           type="submit"
-          className="w-full bg-primary-gradient py-5 text-light-900 "
+          className={`w-full bg-primary-gradient py-5 text-light-900 ${
+            form.formState.isSubmitting ? "opacity-40" : ""
+          }`}
         >
           {form.formState.isSubmitting
             ? buttonText === "Sign In"

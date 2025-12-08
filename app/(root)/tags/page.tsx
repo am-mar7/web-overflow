@@ -95,13 +95,8 @@ export default async function Tags({ searchParams }: RouteParams) {
           data={popularTags}
           error={error}
           empty={{
-            title: "No tags to show",
-            message:
-              "if you added a question with that you would be the first one to use the tag isn't that exiting!",
-            button: {
-              text: "ask question",
-              href: ROUTES.ASK_QUESTION,
-            },
+            title: "No tags Found",
+            message: "",
           }}
           render={(popularTags) => (
             <>

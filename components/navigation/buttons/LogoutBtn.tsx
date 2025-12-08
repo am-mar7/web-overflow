@@ -1,19 +1,31 @@
-import { signOut } from "@/auth";
+"use client";
 import { Button } from "../../ui/button";
 import { LogOut } from "lucide-react";
+import { useState } from "react";
+import { Logout } from "@/lib/server actions/user.action";
 
-export default function LogoutBtn({isMobile = false}: {isMobile?: boolean}) {
+export default function LogoutBtn({
+  isMobile = false,
+}: {
+  isMobile?: boolean;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const handleLogOut = async () => {
+    setLoading(true);
+    await Logout();
+    setLoading(false);
+  };
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signOut();
-      }}
+    <Button
+      disabled={loading}
+      onClick={handleLogOut}
+      className={`py-3 w-full text-dark200_light800 btn-secondary h3-semibold hover:bg-red-600! transition-colors hover:text-light-900! group delay-75 ${
+        loading ? "opacity-40" : ""
+      }`}
     >
-      <Button className="py-3 w-full text-dark200_light800 btn-secondary h3-semibold hover:bg-red-600! transition-colors hover:text-light-900! group delay-75">
-        <LogOut />
-        <span className={isMobile ? "" : "max-xl:hidden"}>Logout</span>
-      </Button> 
-    </form>
+      <LogOut />
+      <span className={isMobile ? "" : "max-xl:hidden"}>{loading ? "Logging out..." : "Logout"}</span>
+    </Button>
   );
 }

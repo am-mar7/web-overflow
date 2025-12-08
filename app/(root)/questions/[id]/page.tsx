@@ -240,7 +240,7 @@ export default async function QuestionDetails({
       </div>
 
       <section className="mb-5">
-        <AllAnswers page={page} questionId={question._id} filter={filter} />
+        <AllAnswers questionAuthor={question.author} page={page} questionId={question._id} filter={filter} />
       </section>
 
       <section>

@@ -5,16 +5,19 @@ import AnswerCard from "./cards/AnswerCard";
 import CommentFilters from "./filters/CommentFilters";
 import { AnswerFilters } from "@/constants";
 import { getAnswers } from "@/lib/server actions/answer.action";
+import { Author } from "@/Types/global";
 
 interface Props {
   page?: number | string;
   filter?: string;
   questionId: string;
+  questionAuthor: Author;
 }
 export default async function AllAnswers({
   page = 1,
   questionId,
   filter,
+  questionAuthor,
 }: Props) {
   const [{ data, success, error }, session] = await Promise.all([
     getAnswers({
@@ -46,7 +49,10 @@ export default async function AllAnswers({
           data={answers}
           empty={{
             title: "No answers yet !",
-            message: "be first one to help this developr",
+            message:
+              questionAuthor._id === userId
+                ? ""
+                : "be first one to help this developer",
           }}
           render={(data) =>
             data?.map((answer) => (

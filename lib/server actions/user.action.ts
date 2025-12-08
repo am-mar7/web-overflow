@@ -30,6 +30,8 @@ import {
 import { NotFoundError } from "../http-errors";
 import { assignBadges } from "../utils";
 import { cache } from "react";
+import { signOut } from "@/auth";
+import ROUTES from "@/constants/routes";
 
 export async function getUsers(
   params: PaginatedSearchParams
@@ -261,4 +263,8 @@ export async function getUserStats(userId: string): Promise<
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
+}
+
+export async function Logout() {
+  await signOut({ redirectTo: ROUTES.HOME });
 }
