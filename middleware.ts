@@ -36,15 +36,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // Protect all other API routes
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    return NextResponse.next();
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   // Handle protected page routes
