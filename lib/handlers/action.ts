@@ -31,25 +31,43 @@ export default async function actionHandler<T>({
     session = await auth();
     if (!session) return new UnauthorizedError();
   }
+
   try {
     await dbConnect();
+    
+    // Double-check connection is ready
     if (mongoose.connection.readyState !== 1) {
       throw new Error("Database connection not ready");
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Database connection error:", error);
 
-    // Return user-friendly error
+    // Check for specific error types
+    const errorMessage = error.message?.toLowerCase() || '';
+    
     if (
-      error.message?.includes("timeout") ||
-      error.message?.includes("buffering")
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("timed out") ||
+      errorMessage.includes("server monitor timeout") ||
+      errorMessage.includes("server selection")
     ) {
-      return new Error("network connection timeout. Please try again ");
+      return new Error("Connection timeout. Please check your network and try again.");
+    }
+
+    if (
+      errorMessage.includes("buffering") ||
+      errorMessage.includes("interrupted")
+    ) {
+      return new Error("Connection interrupted. Please try again.");
+    }
+
+    if (errorMessage.includes("enotfound") || errorMessage.includes("dns")) {
+      return new Error("Something went wrong. Please check your internet connection.");
     }
 
     return new Error(
-      "Connection Faild. Please check your network and try again."
+      "Connection failed. Please check your network and try again."
     );
   }
 

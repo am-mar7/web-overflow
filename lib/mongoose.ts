@@ -6,7 +6,6 @@ if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined");
 }
 
-// Connection states enum for clarity
 const ConnectionStates = {
   disconnected: 0,
   connected: 1,
@@ -14,15 +13,12 @@ const ConnectionStates = {
   disconnecting: 3,
 } as const;
 
-// Track if we're currently connecting to prevent duplicate connection attempts
 let isConnecting = false;
-
-// Set up connection event listeners only once
 let listenersInitialized = false;
 
 const initializeListeners = () => {
   if (listenersInitialized) return;
-  
+
   mongoose.connection.on("connected", () => {
     console.log("✅ Connected to MongoDB");
     isConnecting = false;
@@ -38,7 +34,25 @@ const initializeListeners = () => {
     isConnecting = false;
   });
 
+  // NEW: Handle server selection timeout
+  mongoose.connection.on("timeout", () => {
+    console.error("⏱️ MongoDB connection timeout");
+    isConnecting = false;
+  });
+
   listenersInitialized = true;
+};
+
+// NEW: Function to verify connection is actually working
+const verifyConnection = async (): Promise<boolean> => {
+  try {
+    // Ping the database with a short timeout
+    await mongoose.connection.db?.admin().ping();
+    return true;
+  } catch (error) {
+    console.error("Connection verification failed:", error);
+    return false;
+  }
 };
 
 export const dbConnect = async () => {
@@ -46,22 +60,40 @@ export const dbConnect = async () => {
 
   const currentState = mongoose.connection.readyState;
 
-  // Already connected - return immediately (this is your "cache")
+  // If connected, verify it's actually working
   if (currentState === ConnectionStates.connected) {
-    return mongoose;
+    const isValid = await verifyConnection();
+    if (isValid) {
+      return mongoose;
+    } else {
+      // Connection is stale, close and reconnect
+      console.warn("⚠️ Connection is stale, reconnecting...");
+      try {
+        await mongoose.connection.close();
+      } catch (err) {
+        console.error("Error closing stale connection:", err);
+      }
+    }
   }
 
   // Already connecting - wait for it
   if (isConnecting || currentState === ConnectionStates.connecting) {
-    while (mongoose.connection.readyState === ConnectionStates.connecting) {
+    let attempts = 0;
+    const maxAttempts = 100; // 10 seconds max wait
+    
+    while (mongoose.connection.readyState === ConnectionStates.connecting && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
     }
+    
     if (mongoose.connection.readyState === ConnectionStates.connected) {
-      return mongoose;
+      const isValid = await verifyConnection();
+      if (isValid) return mongoose;
+      // If not valid after connecting, fall through to reconnect
     }
   }
 
-  // If in a bad state (disconnecting), wait for it to finish
+  // If disconnecting, wait for it to finish
   if (currentState === ConnectionStates.disconnecting) {
     await mongoose.connection.close();
   }
@@ -84,6 +116,13 @@ export const dbConnect = async () => {
 
     await mongoose.connect(MONGODB_URI, opts);
     isConnecting = false;
+    
+    // Verify the new connection works
+    const isValid = await verifyConnection();
+    if (!isValid) {
+      throw new Error("Connection established but ping failed");
+    }
+    
     return mongoose;
   } catch (error) {
     isConnecting = false;
