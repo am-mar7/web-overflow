@@ -27,19 +27,16 @@ import { createInteraction } from "./interaction.action";
 export async function createAnswer(
   params: createAnswerParams
 ): Promise<ActionResponse<IAnswerDoc>> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params,
-      schema: createAnswerSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
+  const validated = await actionHandler({
+    params,
+    schema: createAnswerSchema,
+    authorizetionProccess: true,
+  });
 
-  if (validated instanceof Error) {
-    await session.endSession();
+  if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
-  }
+
+  const session = await mongoose.startSession();
 
   const userId = validated?.session?.user?.id;
 
@@ -154,23 +151,19 @@ export async function getAnswers(params: getAnswersParams): Promise<
 export async function deleteAnswer(
   params: deleteAnswerParams
 ): Promise<ActionResponse> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params,
-      schema: deleteAnswerSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
+  const validated = await actionHandler({
+    params,
+    schema: deleteAnswerSchema,
+    authorizetionProccess: true,
+  });
 
-  if (validated instanceof Error) {
-    await session.endSession();
+  if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
-  }
 
   const { answerId } = validated.params!;
   const userId = validated.session?.user?.id;
 
+  const session = await mongoose.startSession();
   session.startTransaction();
   try {
     const answer = (await answerModel

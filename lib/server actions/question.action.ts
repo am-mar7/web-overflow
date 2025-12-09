@@ -37,19 +37,16 @@ import { auth } from "@/auth";
 export async function createQuestion(
   params: QuestionParams
 ): Promise<ActionResponse<Question | null>> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params,
-      schema: createQuestionSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
-  if (validated instanceof Error) {
-    await session.endSession();
-    return handleError(validated) as ErrorResponse;
-  }
+  const validated = await actionHandler({
+    params,
+    schema: createQuestionSchema,
+    authorizetionProccess: true,
+  });
 
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
+
+  const session = await mongoose.startSession();
   session.startTransaction();
 
   const { title, content, tags } = validated.params!;
@@ -129,19 +126,16 @@ export async function createQuestion(
 export async function updateQuestion(
   params: updateQuestionParams
 ): Promise<ActionResponse<Question | null>> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params,
-      schema: editQuestionSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
-  if (validated instanceof Error) {
-    await session.endSession();
-    return handleError(validated) as ErrorResponse;
-  }
+  const validated = await actionHandler({
+    params,
+    schema: editQuestionSchema,
+    authorizetionProccess: true,
+  });
 
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
+
+  const session = await mongoose.startSession();
   session.startTransaction();
 
   const { title, content, tags, questionId } = validated.params!;
@@ -379,23 +373,19 @@ export async function getHotQuestions(): Promise<ActionResponse<Question[]>> {
 export async function deleteQuestion(
   params: deleteQuestionParams
 ): Promise<ActionResponse> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params,
-      schema: deleteQuestionSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
+  const validated = await actionHandler({
+    params,
+    schema: deleteQuestionSchema,
+    authorizetionProccess: true,
+  });
 
-  if (validated instanceof Error) {
-    await session.endSession();
+  if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
-  }
 
   const { questionId } = validated.params!;
   const userId = validated.session?.user?.id;
 
+  const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
@@ -455,7 +445,6 @@ export async function deleteQuestion(
     await session.commitTransaction();
 
     revalidatePath("/", "layout");
-
     after(async () => {
       await createInteraction({
         performerId: userId,

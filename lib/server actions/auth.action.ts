@@ -14,19 +14,17 @@ import { NotFoundError } from "../http-errors";
 export async function credentialsSignUp(
   params: AuthCredentials
 ): Promise<ActionResponse> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params: params,
-      schema: SignUpSchema,
-    }),
-    mongoose.startSession(),
-  ]);
-  if (validated instanceof Error) {
-    await session.endSession();
+  const validated = await actionHandler({
+    params: params,
+    schema: SignUpSchema,
+  });
+
+  if (validated instanceof Error) 
     return handleError(validated) as ErrorResponse;
-  }
+  
   const { name, email, password } = validated.params!;
 
+  const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
@@ -38,7 +36,7 @@ export async function credentialsSignUp(
       User.create([{ name, email }], { session }),
     ]);
     if (!newUser) throw new Error("Failed to create new User");
-    
+
     await Account.create(
       [
         {

@@ -20,23 +20,19 @@ import { after } from "next/server";
 export async function toggleSaveQuestion(
   questionId: string
 ): Promise<ActionResponse> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params: { questionId },
-      schema: CollectionSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
+  const validated = await actionHandler({
+    params: { questionId },
+    schema: CollectionSchema,
+    authorizetionProccess: true,
+  });
 
-  if (validated instanceof Error) {
-    await session.endSession();
+  if (validated instanceof Error)
     return handleError(validated) as ErrorResponse;
-  }
 
   const userId = validated.session?.user?.id;
   if (!userId) return handleError(new UnauthorizedError()) as ErrorResponse;
 
+  const session = await mongoose.startSession();
   session.startTransaction();
 
   try {

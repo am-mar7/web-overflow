@@ -52,19 +52,16 @@ async function updateVoteCount(
 export async function createVote(
   params: createVoteParams
 ): Promise<ActionResponse> {
-  const [validated, session] = await Promise.all([
-    actionHandler({
-      params,
-      schema: createVoteSchema,
-      authorizetionProccess: true,
-    }),
-    mongoose.startSession(),
-  ]);
-  if (validated instanceof Error) {
-    await session.endSession();
-    return handleError(validated) as ErrorResponse;
-  }
+  const validated = await actionHandler({
+    params,
+    schema: createVoteSchema,
+    authorizetionProccess: true,
+  });
 
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
+
+  const session = await mongoose.startSession();
   session.startTransaction();
 
   const { targetId, targetType, voteType } = validated.params!;
