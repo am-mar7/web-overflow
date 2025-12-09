@@ -16,7 +16,7 @@ import ROUTES from "@/constants/routes";
 import { deleteQuestion } from "@/lib/server actions/question.action";
 import { deleteAnswer } from "@/lib/server actions/answer.action";
 import { toast } from "sonner";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -25,19 +25,23 @@ interface Props {
   id: string;
   navigate?: boolean;
 }
-export default function ActionsButton({ type, id , navigate=false }: Props) {
+export default function ActionsButton({ type, id, navigate = false }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [isOpen , setIsOpen] = useState(false);
   const router = useRouter();
 
   const handleDelete = async () => {
     startTransition(async () => {
+      setIsOpen(false);
       const deleteFn = type === "question" ? deleteQuestion : deleteAnswer;
       const params = { questionId: id, answerId: id };
       const { success, error } = await deleteFn(params);
       if (!success) toast.error(error?.message || `Failed to delete ${type}`);
-      if(success && navigate) {
+      if (success && navigate) {
         router.push(ROUTES.HOME);
-        toast.success(`${type} deleted successfully`);
+        setTimeout(() => {
+          toast.success(`${type} deleted successfully`);
+        }, 100);
       }
     });
   };
@@ -59,7 +63,7 @@ export default function ActionsButton({ type, id , navigate=false }: Props) {
           </Link>
         </div>
         <div>
-          <AlertDialog>
+          <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
             <AlertDialogTrigger asChild>
               <Image
                 className={`${isPending ? "opacity-40" : ""}`}
@@ -90,7 +94,7 @@ export default function ActionsButton({ type, id , navigate=false }: Props) {
     );
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger>
         <Image
           className={`${isPending ? "opacity-40" : ""}`}
