@@ -364,7 +364,7 @@ export async function getHotQuestions(): Promise<ActionResponse<Question[]>> {
       .sort({ upvotes: -1, views: -1 })
       .limit(5);
 
-    return { success: true, data: questions };
+    return { success: true, data: JSON.parse(JSON.stringify(questions)) };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }

@@ -63,7 +63,6 @@ export async function createVote(
 
   const session = await mongoose.startSession();
   session.startTransaction();
-
   const { targetId, targetType, voteType } = validated.params!;
   const userId = validated.session?.user?.id;
   try {
